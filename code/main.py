@@ -3,6 +3,7 @@ import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 from momentum_trading_strategy import momentum_trading_strategy
+from price_prediction import train_model, make_predictions
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -133,17 +134,39 @@ def run_analysis(symbol: str, timeframe: str):
     except Exception as e:
         raise Exception(f"Analysis failed: {str(e)}")
 
+def get_price_predictions(symbol: str, timeframe: str):
+    """Get price predictions for different time horizons."""
+    try:
+        # Fetch data
+        data = fetch_stock_data(symbol, timeframe)
+        
+        # Train model and make predictions
+        model, scaler, scores = train_model(data)  # Unpack all three values
+        predictions = make_predictions(model, data, scaler)
+        
+        # Display model performance
+        st.sidebar.subheader("Model Performance")
+        st.sidebar.metric("Training Score", f"{scores[0]:.2%}")
+        st.sidebar.metric("Testing Score", f"{scores[1]:.2%}")
+        
+        return predictions
+        
+    except ValueError as e:
+        st.error(f"Validation Error: {str(e)}")
+        return None
+    except Exception as e:
+        st.error(f"Prediction failed: {str(e)}")
+        return None
+
 def main():
     st.title("Stock Trading Strategy Analysis")
     
     # Create two columns for input fields
     col1, col2 = st.columns(2)
     
-    # Input for stock symbol
     with col1:
         symbol = st.text_input("Enter Stock Symbol (e.g., NVDA):", "NVDA")
     
-    # Timeframe selector
     with col2:
         timeframe = st.selectbox(
             "Select Timeframe:",
@@ -151,7 +174,8 @@ def main():
             index=3  # Default to 1Y
         )
     
-    if st.button("Analyze"):
+    # Main analysis button with unique key
+    if st.button("Analyze Strategy", key="analyze_strategy"):
         if not symbol.strip():
             st.error("Please enter a stock symbol")
             return
@@ -168,6 +192,26 @@ def main():
                 analysis = generate_chart_analysis(symbol, results['5_20'])
                 st.write(analysis)
                 
+                # Price prediction section with separate button
+                st.subheader("Price Predictions")
+                try:
+                    with st.spinner("Generating predictions..."):
+                        predictions = get_price_predictions(symbol, timeframe)
+                        if predictions:
+                            cols = st.columns(len(predictions))
+                            current_price = results['5_20']['price'].iloc[-1]
+                            
+                            for col, (horizon, price) in zip(cols, predictions.items()):
+                                with col:
+                                    change = ((price - current_price) / current_price) * 100
+                                    st.metric(
+                                        label=f"{horizon} Forecast",
+                                        value=f"${price:,.2f}",
+                                        delta=f"{change:+.2f}%"
+                                    )
+                except Exception as e:
+                    st.error(f"Prediction error: {str(e)}")
+                
                 # Display statistics
                 st.subheader("Strategy Results")
                 for key, signals in results.items():
@@ -177,5 +221,6 @@ def main():
                 
         except Exception as e:
             st.error(str(e))
+
 if __name__ == "__main__":
     main()
