@@ -3,7 +3,7 @@ import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 from momentum_trading_strategy import momentum_trading_strategy
-from price_prediction import train_model, make_predictions
+from sk_model import train_sk_model, make_sk_predictions
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -141,8 +141,8 @@ def get_price_predictions(symbol: str, timeframe: str):
         data = fetch_stock_data(symbol, timeframe)
         
         # Train model and make predictions
-        model, scaler, scores = train_model(data)  # Unpack all three values
-        predictions = make_predictions(model, data, scaler)
+        model, scaler, scores = train_sk_model(data)  # Unpack all three values
+        predictions = make_sk_predictions(model, data, scaler)
         
         # Display model performance
         st.sidebar.subheader("Model Performance")

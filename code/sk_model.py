@@ -48,7 +48,7 @@ def prepare_data(data, lookback=30):
     except Exception as e:
         raise Exception(f"Data preparation failed: {str(e)}")
 
-def train_model(data):
+def train_sk_model(data):
     """Train RandomForest model for price prediction."""
     try:
         X, y, scaler, feature_names = prepare_data(data)
@@ -84,7 +84,7 @@ def train_model(data):
     except Exception as e:
         raise Exception(f"Model training failed: {str(e)}")
 
-def make_predictions(model, data, scaler):
+def make_sk_predictions(model, data, scaler):
     """Make price predictions for different time horizons."""
     try:
         # Get the most recent data point
