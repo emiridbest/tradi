@@ -36,11 +36,13 @@ pip install -r requirements.txt
 OPENAI_API_KEY=your_api_key_here
 ```
 
+
 ## Usage
 
-1. Start the Streamlit app:
+To run the web application, execute the following command:
+
 ```bash
-streamlit run code/main.py
+python app/main.py
 ```
 
 2. Enter a stock symbol (e.g., NVDA) or cryptocurrency (BTC, ETH, DOGE)
@@ -104,6 +106,8 @@ tradingml-web
 - matplotlib
 - openai
 - python-dotenv
+- flask
+- werkzeug
 
 ## Contributing
 
