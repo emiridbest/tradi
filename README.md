@@ -119,4 +119,4 @@ MIT License - MIT
 
 ## Disclaimer
 
-This tool is for educational purposes only. Always conduct your own research and consider consulting with a financial advisor before making investment decisions.
+This project is licensed under the MIT License. See the LICENSE file for more details.
