@@ -16,7 +16,7 @@ def test_api_connection():
         print(f"API connection error: {str(e)}")
         return False
 
-# Add this to your main() function to test:
+# To be added to main() function to test if need be:
 if test_api_connection():
     st.success("API connection successful!")
 else:
