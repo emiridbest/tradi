@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}TradingML - Home{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <h1 class="display-4 mb-4">Welcome to TradingML</h1>
+    <p class="lead mb-5">
+        A machine learning application for stock analysis and price prediction
+    </p>
+    
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Stock Analysis</h3>
+                    <p class="card-text">Analyze stock movements with our trading strategies and AI insights.</p>
+                    <a href="{{ url_for('views.analyze') }}" class="btn btn-primary">Start Analysis</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Price Prediction</h3>
+                    <p class="card-text">Get price forecasts using our machine learning models.</p>
+                    <a href="{{ url_for('views.predict') }}" class="btn btn-primary">Make Predictions</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

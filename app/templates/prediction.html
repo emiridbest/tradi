@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Price Predictions for {{ symbol }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Price Predictions: {{ symbol }}</h1>
+    <p class="text-muted">Timeframe: {{ timeframe }}</p>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Price Forecasts</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Current Price</h5>
+                            <h2 class="text-primary">${{ last_price|round(2) }}</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                {% for horizon, price in predictions.items() %}
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ horizon }}</h5>
+                            <h2 class="text-primary">${{ price|round(2) }}</h2>
+                            {% set change = ((price - last_price) / last_price * 100)|round(2) %}
+                            <span class="badge {% if change > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ change }}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('views.analyze') }}" class="btn btn-primary">Analyze Another Stock</a>
+        <a href="{{ url_for('views.index') }}" class="btn btn-outline-secondary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Analysis Results for {{ symbol }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Analysis Results: {{ symbol }}</h1>
+    <p class="text-muted">Timeframe: {{ timeframe }}</p>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Price Chart with Trading Signals</h5>
+                    <img src="data:image/png;base64,{{ chart_img }}" class="img-fluid" alt="Trading Chart">
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    AI Analysis
+                </div>
+                <div class="card-body">
+                    {{ analysis|safe }}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    Strategy Statistics
+                </div>
+                <div class="card-body">
+                    {% for key, stat in stats.items() %}
+                    <div class="mb-3">
+                        <h6>MA Pair ({{ stat.short_window }}, {{ stat.long_window }})</h6>
+                        <ul>
+                            <li>Total trades: {{ stat.trade_count }}</li>
+                            <li>Buy signals: {{ stat.buy_signals }}</li>
+                            <li>Sell signals: {{ stat.sell_signals }}</li>
+                        </ul>
+                    </div>
+                    {% if not loop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{{ url_for('views.predict') }}" class="btn btn-primary">Get Price Predictions</a>
+        <a href="{{ url_for('views.analyze') }}" class="btn btn-outline-secondary">Analyze Another Stock</a>
+    </div>
+</div>
+{% endblock %}

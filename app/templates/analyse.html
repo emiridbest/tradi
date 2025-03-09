@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}TradingML - Analyze Stock{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Stock Analysis</h1>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('views.analyze') }}">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="symbol" class="form-label">Stock Symbol</label>
+                        <input type="text" class="form-control" id="symbol" name="symbol" 
+                               value="{{ symbol }}" placeholder="e.g., NVDA" required>
+                        <div class="form-text">Enter a valid stock ticker symbol</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="timeframe" class="form-label">Timeframe</label>
+                        <select class="form-select" id="timeframe" name="timeframe">
+                            {% for tf in timeframes %}
+                            <option value="{{ tf }}" {% if tf == timeframe %}selected{% endif %}>{{ tf }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Analyze Stock</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
