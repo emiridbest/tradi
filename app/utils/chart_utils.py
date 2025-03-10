@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import base64
 from io import BytesIO
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 
-def plot_strategy(signals: pd.DataFrame, symbol: str):
-    """Plot trading strategy results."""
+def plot_to_base64(signals, symbol):
+    """Convert plot to base64 string for embedding in HTML."""
     plt.figure(figsize=(12, 6))
     
     # Plot price and moving averages
@@ -22,13 +24,12 @@ def plot_strategy(signals: pd.DataFrame, symbol: str):
     
     plt.title(f'{symbol} Trading Strategy')
     plt.legend(loc='best')
-    return plt
-
-def save_figure_to_base64(fig):
-    """Convert matplotlib figure to base64 string for embedding in HTML."""
+    
+    # Convert plot to base64 string
     buf = BytesIO()
-    fig.savefig(buf, format='png', bbox_inches='tight')
+    plt.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode('utf-8')
-    plt.close(fig) 
+    plt.close()  # Close to prevent memory leaks
+    
     return img_str

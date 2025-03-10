@@ -3,13 +3,13 @@ import pandas as pd
 import numpy as np
 import traceback
 
-# Import models
-from app.models.model_instance import sk_model, tf_model, sk_model_trained, tf_model_trained
+# Import model from model_instance instead of app.config
+from app.models.model_instance import sk_model, sk_model_trained
+from app.utils.ai_utils import generate_chart_analysis
+# Create a Blueprint for the API routes
+api_bp = Blueprint('api', __name__)
 
-# Create a Blueprint (don't use the same name as the file)
-api_blueprint = Blueprint('api', __name__)
-
-@api_blueprint.route('/train', methods=['POST'])
+@api_bp.route('/train', methods=['POST'])
 def train_model():
     """Train the ML model using provided data."""
     try:
@@ -38,22 +38,22 @@ def train_model():
             'traceback': traceback.format_exc()
         }), 500
 
-@api_blueprint.route('/predict', methods=['POST'])
+@api_bp.route('/predict', methods=['POST'])
 def predict():
     """Make predictions using trained model."""
     try:
         global sk_model, sk_model_trained
-        if not sk_model_trained:
-            return jsonify({
-                'status': 'error',
-                'message': 'Model not trained. Please train the model first.'
-            }), 400
-            
+        
         # Get input data
         data = request.get_json()
         
         # Convert to DataFrame
         df = pd.DataFrame(data['price_history'])
+        
+        # Train model if not already trained (per chart)
+        if not sk_model_trained:
+            metrics = sk_model.train(df)
+            sk_model_trained = True
         
         # Make prediction
         predictions = sk_model.predict(df)
@@ -73,3 +73,11 @@ def predict():
             'message': str(e),
             'traceback': traceback.format_exc()
         }), 500
+
+            
+
+@api_bp.route('/predict', methods=['POST'])
+def reset_model_endpoint():
+    """Reset the model to untrained state"""
+    from app.models.model_instance import reset_model
+    return jsonify(reset_model())
