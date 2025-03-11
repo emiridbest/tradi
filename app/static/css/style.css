@@ -516,18 +516,70 @@ label {
         font-size: 0.9rem;
     }
 }
-
-/* AI Analysis */
-.ai-analysis {
-    background: rgba(15, 23, 42, 0.3);
-    border-radius: var(--border-radius);
-    padding: 15px;
-    margin-top: 10px;
-    white-space: pre-line;
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-/* Fix for incomplete HTML in flashed messages */
-.alert-warning {
-    display: block;
-    width: 100%;
+.btn-outline {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    background-color: transparent;
+    border: 1px solid #4c956c;
+    color: #4c956c;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background-color: #4c956c;
+    color: white;
+}
+
+.analysis-content {
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.formatted-text h1, 
+.formatted-text h2, 
+.formatted-text h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.formatted-text p {
+    margin-bottom: 1em;
+}
+
+.formatted-text ul, 
+.formatted-text ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+}
+
+.formatted-text li {
+    margin-bottom: 0.5em;
+}
+
+.formatted-text strong, 
+.formatted-text b {
+    font-weight: 600;
+}
+
+.formatted-text em, 
+.formatted-text i {
+    font-style: italic;
+}
+
+/* Style headings in the AI analysis */
+.analysis-content h3 {
+    margin-top: 1.5em;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
 }

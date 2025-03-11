@@ -76,7 +76,7 @@ def predict():
 
             
 
-@api_bp.route('/predict', methods=['POST'])
+@api_bp.route('/reset', methods=['POST'])
 def reset_model_endpoint():
     """Reset the model to untrained state"""
     from app.models.model_instance import reset_model

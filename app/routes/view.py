@@ -1,13 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import pandas as pd
 import traceback
-
+from markdown import markdown
 # Import utility functions
 from app.utils.trading_strategy import fetch_stock_data
 from app.utils.chart_utils import plot_to_base64
 from app.utils.trading_strategy import momentum_trading_strategy
 # Import models
 from app.models.model_instance import sk_model, sk_model_trained
+from app.models.model_instance import reset_model
 
 # Define the blueprint with the correct name
 views_bp = Blueprint('views_bp', __name__)
@@ -22,9 +23,11 @@ def index():
 def analyze():
     """Page for stock analysis."""
     if request.method == 'POST':
-        # Get form data
         symbol = request.form.get('symbol', 'NVDA')
         timeframe = request.form.get('timeframe', '1Y')
+        interval = request.form.get('interval', 'day')  # Get interval from form
+        auto_reset = request.form.get('auto_reset', 'false') == 'true'  # Add reset checkbox
+
         
         if not symbol:
             flash('Please enter a stock symbol')
@@ -32,7 +35,7 @@ def analyze():
         
         try:
             # Fetch data
-            data = fetch_stock_data(symbol, timeframe)
+            data = fetch_stock_data(symbol, timeframe, interval)
             
             signals = momentum_trading_strategy(data)
         
@@ -58,14 +61,11 @@ def analyze():
             except Exception as ai_error:
                 print(f"AI analysis error: {str(ai_error)}")
                 analysis = f"Analysis for {symbol}: The stock shows {stats['buy_signals']} buy signals and {stats['sell_signals']} sell signals over the selected timeframe."
-            
-            # Store results in session
-            session['symbol'] = symbol
-            session['timeframe'] = timeframe
-            session['last_price'] = float(signals['price'].iloc[-1])
-            session['chart_img'] = chart_img
-            session['stats'] = stats  
-            session['analysis'] = analysis
+            analysis = markdown(analysis) 
+
+            if auto_reset:
+                reset_result = reset_model()
+                flash(f"Model reset: {reset_result['message']}")
             
             return render_template(
                 'analysis_result.html',
@@ -109,16 +109,25 @@ def analysis_result():
                           analysis=analysis)
 
 @views_bp.route('/predict', methods=['GET', 'POST'])
-@views_bp.route('/predict')  
+@views_bp.route('/predict')
+
 def predict():
     """Page for price predictions."""
     if request.method == 'POST':
         symbol = request.form.get('symbol', 'NVDA')
         timeframe = request.form.get('timeframe', '1Y')
+        interval = request.form.get('interval', 'day')  
+        auto_reset = request.form.get('auto_reset', 'false') == 'true'
+
+        
+        if not symbol:
+            flash('Please enter a stock symbol')
+            return redirect(url_for('views_bp.analyze'))
         
         try:
             # Fetch data
-            data = fetch_stock_data(symbol, timeframe)
+            data = fetch_stock_data(symbol, timeframe, interval)
+            
             
             # Train model if not already trained
             global sk_model, sk_model_trained
@@ -134,16 +143,16 @@ def predict():
             predictions = sk_model.predict(data)
             current_price = float(data['Close'].iloc[-1])
             
-            # Store for display
-            session['predictions'] = {k: float(v) for k, v in predictions.items()}
-            session['price'] = current_price
-            session['performance'] = performance  # Store metrics in session
+
+            if auto_reset:
+                reset_result = reset_model()
+                flash(f"Model reset: {reset_result['message']}")
             
             return render_template('predictions.html',
                                   symbol=symbol,
-                                  predictions=session['predictions'],
+                                  predictions=predictions,
                                   current_price=current_price,
-                                  performance=performance)  # Pass metrics to template
+                                  performance=performance) 
                                   
         except Exception as e:
             flash(f'Error: {str(e)}')
@@ -153,19 +162,22 @@ def predict():
     # For GET requests
     symbol = request.args.get('symbol', session.get('symbol', 'NVDA'))
     timeframes = ['1M', '3M', '6M', '1Y', '2Y', '5Y']
+    timeframe = request.form.get('timeframe', '1Y')
+
     
-    # Get any stored predictions
-    predictions = session.get('predictions', {})
-    current_price = session.get('price', 0.0)
-    performance = session.get('performance', None)
+
     
-    return render_template('predict.html',
-                          symbol=symbol,
-                          timeframes=timeframes,
-                          predictions=predictions,
-                          current_price=current_price,
-                          performance=performance)  # Pass metrics here too
+    return render_template('predict.html',symbol=symbol, timeframe=timeframe, timeframes=timeframes)  # Pass metrics here too
+
 @views_bp.route('/about', methods=['GET', 'POST'])
 def about():
     """About page."""
     return render_template('about.html')
+
+@views_bp.route('/reset_model', methods=['GET'])
+def reset_model_view():
+    """Reset the model and redirect back."""
+    result = reset_model()
+    flash(result['message'])
+    referring_url = request.referrer or url_for('views_bp.index')
+    return redirect(referring_url)

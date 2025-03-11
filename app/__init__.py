@@ -1,10 +1,12 @@
 from flask import Flask, render_template
-
+import os
+from flask_session import Session
+import tempfile
 def create_app(test_config=None):
     """Create and configure the Flask application"""
     app = Flask(__name__)
     
-    import os
+
     from dotenv import load_dotenv
     
     load_dotenv()
@@ -12,7 +14,11 @@ def create_app(test_config=None):
     app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
     app.config['UPLOAD_FOLDER'] = 'uploads'
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload
-    
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = os.path.join(tempfile.gettempdir(), 'flask_session')
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
     os.makedirs('uploads', exist_ok=True)
     os.makedirs('results', exist_ok=True)
     
@@ -50,6 +56,7 @@ def create_app(test_config=None):
         return render_template('500.html'), 500
     print("Registering blueprints...")
 
-    
+    Session(app)
+
 
     return app

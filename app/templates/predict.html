@@ -1,57 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tradi - Price Prediction</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .prediction-form {
-            margin-bottom: 30px;
-        }
-        
-        .spinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100px;
-        }
-        
-        .spinner::after {
-            content: "";
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 200, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .popular-stocks {
-            margin-top: 20px;
-        }
-        
-        .stock-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            margin: 5px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .stock-btn:hover {
-            background: rgba(0, 200, 255, 0.2);
-            border-color: var(--primary-color);
-        }
-    </style>
+
 </head>
+
 <body>
     <nav class="navbar">
         <div class="container">
@@ -77,32 +34,33 @@
             </div>
         </div>
     </nav>
-    
+
     <div class="container mt-4">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-warning">
-                {{ message }}
-                <button class="btn-close">&times;</button>
-            </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-warning">
+            {{ message }}
+            <button class="btn-close">&times;</button>
+        </div>
+        {% endfor %}
         {% endif %}
         {% endwith %}
-        
+
         <div class="glass-card">
             <h1>Stock Price Prediction</h1>
-            
+
             <div class="prediction-form">
                 <form id="predictionForm" method="POST" action="{{ url_for('views_bp.predict') }}">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="symbol">Enter Stock Symbol (e.g., NVDA):</label>
-                                <input type="text" class="form-control" id="symbol" name="symbol" value="{{ symbol }}" placeholder="e.g., NVDA" required>
+                                <input type="text" class="form-control" id="symbol" name="symbol" value="{{ symbol }}"
+                                    placeholder="e.g., NVDA" required>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="timeframe">Select Timeframe:</label>
@@ -112,14 +70,30 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="interval">Select Interval:</label>
+                                <select class="form-control" id="interval" name="interval">
+                                    <option value="hour">Hourly</option>
+                                    <option value="15min">15 Minutes</option>
+                                    <option value="day" selected>Daily</option>
+                                    <option value="week">Weekly</option>
+                                </select>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="auto_reset" name="auto_reset"
+                                    value="true">
+                                <label class="form-check-label" for="auto_reset">
+                                    Reset model after prediction (for new data)
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary" id="predictBtn">
                         <span class="btn-text">Generate Predictions</span>
                     </button>
                 </form>
-                
+
                 <div class="popular-stocks">
                     <h3>Popular Stocks</h3>
                     <p>Click to select:</p>
@@ -135,39 +109,36 @@
             </div>
         </div>
     </div>
-    
-    <footer class="footer">
-        <div class="container text-center">
-            <p class="text-muted">Tradi Trading Application &copy; 2025</p>
-        </div>
-    </footer>
-    
+
+
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Handle form submission with JavaScript
             const form = document.getElementById('predictionForm');
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 // Change button text
                 document.querySelector("#predictBtn .btn-text").textContent = "Generating...";
                 document.getElementById('predictBtn').disabled = true;
             });
-            
+
             // Close alert messages when clicking the X button
             document.querySelectorAll('.btn-close').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     this.parentElement.style.display = 'none';
                 });
             });
         });
-        
+
         function toggleMenu() {
             var navbar = document.getElementById("navbarNav");
             navbar.classList.toggle("show");
         }
-        
+
         function selectStock(symbol) {
             document.getElementById('symbol').value = symbol;
         }
     </script>
 </body>
+
 </html>

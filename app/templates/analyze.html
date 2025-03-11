@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="container">
@@ -67,13 +69,40 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="interval">Select Interval:</label>
+                            <select class="form-control" id="interval" name="interval">
+                                <option value="hour">Hourly</option>
+                                <option value="15min">15 Minutes</option>
+                                <option value="day" selected>Daily</option>
+                                <option value="week">Weekly</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto_reset" name="auto_reset" value="true">
+                    <label class="form-check-label" for="auto_reset">
+                        Reset model after prediction (for new data)
+                    </label>
+                </div>
                 <button type="button" class="btn btn-primary" id="analyzeBtn" onclick="analyzeStock()">
                     <span class="btn-text">Analyze Strategy</span>
                 </button>
             </div>
+            
+        <div class="popular-stocks">
+            <h3>Popular Stocks</h3>
+            <p>Click to select:</p>
+            <div>
+                <button class="stock-btn" onclick="selectStock('AAPL')">Apple (AAPL)</button>
+                <button class="stock-btn" onclick="selectStock('MSFT')">Microsoft (MSFT)</button>
+                <button class="stock-btn" onclick="selectStock('GOOGL')">Google (GOOGL)</button>
+                <button class="stock-btn" onclick="selectStock('AMZN')">Amazon (AMZN)</button>
+                <button class="stock-btn" onclick="selectStock('TSLA')">Tesla (TSLA)</button>
+                <button class="stock-btn" onclick="selectStock('NVDA')">NVIDIA (NVDA)</button>
+            </div>
+        </div>
         </div>
 
         <div id="results-container" class="results-container" style="display: none;">
@@ -89,7 +118,9 @@
                 <div id="strategy-metrics"></div>
             </div>
         </div>
+
     </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
     <script>
         function toggleMenu() {
@@ -99,12 +130,12 @@
         function analyzeStock() {
             const symbol = document.getElementById('symbol').value;
             const timeframe = document.getElementById('timeframe').value;
-            
+
             if (!symbol) {
                 alert('Please enter a stock symbol');
                 return;
             }
-            
+
             // Show loading spinner and results container
             document.getElementById('results-container').style.display = 'block';
             document.getElementById('loading-spinner').style.display = 'block';
@@ -112,8 +143,7 @@
             document.getElementById('ai-analysis').style.display = 'none';
             document.getElementById('prediction-results').style.display = 'none';
             document.getElementById('strategy-results').style.display = 'none';
-            
-            // Use POST method for analysis
+
             fetch("{{ url_for('views_bp.analyze') }}", {
                 method: 'POST',
                 headers: {
@@ -121,58 +151,55 @@
                 },
                 body: `symbol=${symbol}&timeframe=${timeframe}`
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(html => {
-                // If it's JSON, parse it
-                if (html.startsWith('{')) {
-                    return JSON.parse(html);
-                }
-                
-                // Otherwise, it's an HTML response, so we'll redirect to the analysis_result page
-                window.location.href = "{{ url_for('views_bp.analysis_result') }}";
-                return null;
-            })
-            .then(data => {
-                if (data) {
-                    displayResults(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(`Error: ${error.message}`);
-                document.getElementById('loading-spinner').style.display = 'none';
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (html.startsWith('{')) {
+                        return JSON.parse(html);
+                    }
+
+                    window.location.href = "{{ url_for('views_bp.analysis_result') }}";
+                    return null;
+                })
+                .then(data => {
+                    if (data) {
+                        displayResults(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`Error: ${error.message}`);
+                    document.getElementById('loading-spinner').style.display = 'none';
+                });
         }
 
-        // Update your view.py file to return JSON instead of redirecting
         function displayResults(data) {
             // Hide loading spinner
             document.getElementById('loading-spinner').style.display = 'none';
-            
+
             // Show chart container and create chart
             document.getElementById('chart-container').style.display = 'block';
             document.getElementById('chart-container').innerHTML = `<img src="data:image/png;base64,${data.chart_img}" alt="Trading Strategy Chart" class="img-fluid">`;
-            
+
             // Show AI analysis if available
             if (data.ai_analysis) {
                 document.getElementById('ai-analysis').style.display = 'block';
                 document.getElementById('ai-analysis').innerHTML = `<h2>AI Analysis</h2><p>${data.ai_analysis}</p>`;
             }
-            
+
             // Show prediction results if available
             if (data.predictions) {
                 document.getElementById('prediction-results').style.display = 'block';
                 let metricsHTML = '';
-                
+
                 for (const [horizon, price] of Object.entries(data.predictions)) {
                     const change = ((price - data.current_price) / data.current_price) * 100;
                     const changeClass = change >= 0 ? 'positive' : 'negative';
-                    
+
                     metricsHTML += `
                     <div class="metric-card">
                         <div class="metric-label">${horizon} Forecast</div>
@@ -180,10 +207,10 @@
                         <div class="metric-delta ${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
                     </div>`;
                 }
-                
+
                 document.getElementById('prediction-metrics').innerHTML = metricsHTML;
             }
-            
+
             // Show strategy results
             document.getElementById('strategy-results').style.display = 'block';
             document.getElementById('strategy-metrics').innerHTML = `
@@ -196,4 +223,5 @@
         }
     </script>
 </body>
+
 </html>

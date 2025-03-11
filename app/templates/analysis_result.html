@@ -45,7 +45,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        
+
         <div class="glass-card">
             <h1>Analysis Results for {{ symbol }}</h1>
             <p>Timeframe: {{ timeframe }}</p>
@@ -80,27 +80,87 @@
 
         {% if analysis %}
         <div class="glass-card">
-            <h2>AI Analysis</h2>
-            <p>{{ analysis }}</p>
+            <div class="analysis-header">
+                <h2>AI Analysis</h2>
+                <button class="btn-outline" onclick="exportAnalysis()">
+                    Export Analysis
+                </button>
+            </div>
+            <div class="analysis-content formatted-text" id="analysis-content">
+                {{ analysis | safe }}
+            </div>
         </div>
         {% endif %}
 
         <div class="glass-card">
-            <a href="{{ url_for('views_bp.predict', symbol=symbol) }}" class="btn btn-primary">Make Price Predictions</a>
+            <a href="{{ url_for('views_bp.predict', symbol=symbol) }}" class="btn btn-primary">Make Price
+                Predictions</a>
             <a href="{{ url_for('views_bp.analyze') }}" class="btn btn-secondary">Analyze Another Stock</a>
         </div>
     </div>
-
     <footer class="footer">
         <div class="container text-center">
             <p class="text-muted">Tradi &copy; 2025</p>
         </div>
     </footer>
-    
+
     <script>
         function toggleMenu() {
             document.getElementById('navbarNav').classList.toggle('show');
         }
+        function exportAnalysis() {
+            // Get the analysis text
+            const analysisText = document.getElementById('analysis-content').innerText;
+            const symbol = '{{ symbol }}';
+            const timeframe = '{{ timeframe }}';
+            const date = new Date().toISOString().split('T')[0];
+
+            // Format with header information
+            const headerText = `TRADING ANALYSIS FOR ${symbol.toUpperCase()}\n`;
+            const divider = "=".repeat(headerText.length - 1) + "\n";
+            const metaText = `Timeframe: ${timeframe}\nDate: ${date}\n\n`;
+
+            const formattedText = headerText + divider + metaText + analysisText;
+
+            // Create filename
+            const filename = `${symbol.toLowerCase()}_analysis_${date}.txt`;
+
+            // Create a download link
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(formattedText));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const analysisContent = document.getElementById('analysis-content');
+            if (analysisContent) {
+                // Get the HTML content
+                let html = analysisContent.innerHTML;
+
+                // Format markdown-style headings (### Heading)
+                html = html.replace(/###\s+(.*?)(?:\n|$)/g, '<h3>$1</h3>');
+
+                // Format bold text (**text**)
+                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                // Format italic text (*text*)
+                html = html.replace(/\*([^\*]+)\*/g, '<em>$1</em>');
+
+                // Format bullet points
+                html = html.replace(/- (.*?)(?:\n|$)/g, '<li>$1</li>');
+                html = html.replace(/(<li>.*?<\/li>)\s*(<li>)/g, '$1\n<ul>$2');
+                html = html.replace(/(<\/li>)\s*(?!<li>)/g, '$1</ul>');
+
+                // Update the content
+                analysisContent.innerHTML = html;
+            }
+        });
     </script>
 </body>
 

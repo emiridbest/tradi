@@ -66,8 +66,17 @@
                                 <label for="timeframe">Select Timeframe for Training:</label>
                                 <select class="form-control" id="timeframe" name="timeframe">
                                     {% for tf in timeframes %}
-                                    <option value="{{ tf }}" {% if tf == '1Y' %}selected{% endif %}>{{ tf }}</option>
+                                    <option value="{{ tf }}" {% if tf=='1Y' %}selected{% endif %}>{{ tf }}</option>
                                     {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="interval">Select Interval:</label>
+                                <select class="form-control" id="interval" name="interval">
+                                    <option value="hour">Hourly</option>
+                                    <option value="15min">15 Minutes</option>
+                                    <option value="day" selected>Daily</option>
+                                    <option value="week">Weekly</option>
                                 </select>
                             </div>
                         </div>
@@ -83,7 +92,7 @@
         <div class="glass-card prediction-results">
             <h2>Price Forecasts</h2>
             <p>Current price: ${{ "%.2f"|format(current_price) }}</p>
-        
+
             <div class="metric-row">
                 {% for horizon, price in predictions.items() %}
                 {% set change = ((price - current_price) / current_price * 100)|float %}
@@ -97,7 +106,7 @@
                 {% endfor %}
             </div>
         </div>
-        
+
         {% if performance %}
         <div class="glass-card">
             <h2>Model Performance Metrics</h2>
@@ -122,11 +131,13 @@
         </div>
         {% endif %}
         {% endif %}
+        <div class="glass-card">
+            <a href="{{ url_for('views_bp.predict', symbol=symbol) }}" class="btn btn-primary">Make Price
+                Predictions</a>
+            <a href="{{ url_for('views_bp.analyze') }}" class="btn btn-secondary">Analyze Another Stock</a>
+        </div>
     </div>
-    <div class="glass-card">
-        <a href="{{ url_for('views_bp.predict', symbol=symbol) }}" class="btn btn-primary">Make Price Predictions</a>
-        <a href="{{ url_for('views_bp.analyze') }}" class="btn btn-secondary">Analyze Another Stock</a>
-    </div>
+
     <footer class="footer">
         <div class="container text-center">
             <p class="text-muted">Tradi &copy; 2025</p>
@@ -144,11 +155,11 @@
                     document.querySelector("#predictBtn .btn-text").textContent = "Generating...";
                     document.getElementById('predictBtn').disabled = true;
 
-                    // Save the stock symbol
-                    const symbol = document.getElementById('symbol').value;
-                    if (symbol) {
-                        saveRecentStock(symbol);
-                    }
+                    // Show loading spinner
+                    const spinner = document.createElement('div');
+                    spinner.className = 'loading-spinner';
+                    form.appendChild(spinner);
+
                 });
             }
         });

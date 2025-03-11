@@ -65,33 +65,17 @@
                 </div>
             </div>
             
-            <div class="mt-4">
+
+            <div class="popular-stocks">
                 <h3>Popular Stocks</h3>
-                <div class="row">
-                    <div class="col-md-3 col-sm-6">
-                        <a href="{{ url_for('views_bp.analyze', symbol='AAPL') }}" class="crypto-card">
-                            <div class="crypto-icon">AAPL</div>
-                            <div class="crypto-details">Apple Inc.</div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="{{ url_for('views_bp.analyze', symbol='MSFT') }}" class="crypto-card">
-                            <div class="crypto-icon">MSFT</div>
-                            <div class="crypto-details">Microsoft</div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="{{ url_for('views_bp.analyze', symbol='NVDA') }}" class="crypto-card">
-                            <div class="crypto-icon">NVDA</div>
-                            <div class="crypto-details">NVIDIA</div>
-                        </a>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <a href="{{ url_for('views_bp.analyze', symbol='TSLA') }}" class="crypto-card">
-                            <div class="crypto-icon">TSLA</div>
-                            <div class="crypto-details">Tesla</div>
-                        </a>
-                    </div>
+                <p>Click to select:</p>
+                <div>
+                    <button class="stock-btn" onclick="selectStock('AAPL')">Apple (AAPL)</button>
+                    <button class="stock-btn" onclick="selectStock('MSFT')">Microsoft (MSFT)</button>
+                    <button class="stock-btn" onclick="selectStock('GOOGL')">Google (GOOGL)</button>
+                    <button class="stock-btn" onclick="selectStock('AMZN')">Amazon (AMZN)</button>
+                    <button class="stock-btn" onclick="selectStock('TSLA')">Tesla (TSLA)</button>
+                    <button class="stock-btn" onclick="selectStock('NVDA')">NVIDIA (NVDA)</button>
                 </div>
             </div>
         </div>

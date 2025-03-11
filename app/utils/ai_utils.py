@@ -42,3 +42,5 @@ def generate_chart_analysis(symbol: str, signals: pd.DataFrame) -> str:
         return response.choices[0].message.content
     except Exception as e:
         return f"Could not generate analysis: {str(e)}"
+    
+
