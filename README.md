@@ -5,7 +5,7 @@ This project is a web application for trading machine learning models. It provid
 ## Project Structure
 
 ```
-tradingml-web
+Tradi
 ├── app               
 │   ├── __init__.py   
 │   ├── main.py       
@@ -16,6 +16,7 @@ tradingml-web
 │   ├── routes        # API endpoints
 │   │   ├── __init__.py
 │   │   └── api.py
+│   │   └── view.py
 │   ├── static        
 │   │   ├── css
 │   │   │   └── style.css
@@ -27,9 +28,11 @@ tradingml-web
 │       └── analysis_result.html
 │       └── base.html
 │       └── index.html
-│       └── prediction.html
+│       └── predict.html
+│       └── predictions.html
 ├── utils             
 │   └── .gitkeep
+│   └──  ai_utils.py
 │   └──  chart_utils.py
 │   └── trading_strategy
 ├── notebooks        
@@ -48,7 +51,7 @@ tradingml-web
 To set up the project, clone the repository and install the required dependencies:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/emiridbest/tradi
 cd tradi
 pip install -r requirements.txt
 ```
@@ -69,4 +72,4 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the MIT License.
