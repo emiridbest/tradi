@@ -1,7 +1,0 @@
-{
-    "openai_model": "gpt-4o",
-    "data_source": "yfinance",
-    "start_date": "2024-01-01",
-    "end_date": "2024-11-10",
-    "symbol": "NVDA"
-}

@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from momentum_trading_strategy import momentum_trading_strategy
 from sk_model import train_sk_model, make_sk_predictions
+from tf_model import train_tf_model, make_tf_predictions
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -141,15 +142,15 @@ def get_price_predictions(symbol: str, timeframe: str):
         data = fetch_stock_data(symbol, timeframe)
         
         # Train model and make predictions
-        model, scaler, scores = train_sk_model(data)  # Unpack all three values
-        predictions = make_sk_predictions(model, data, scaler)
+        sk_model, sk_scaler, sk_scores = train_sk_model(data)  # Unpack all three values
+        sk_predictions = make_sk_predictions(sk_model, data, sk_scaler)
         
         # Display model performance
         st.sidebar.subheader("Model Performance")
-        st.sidebar.metric("Training Score", f"{scores[0]:.2%}")
-        st.sidebar.metric("Testing Score", f"{scores[1]:.2%}")
+        st.sidebar.metric("Training Score", f"{sk_scores[0]:.2%}")
+        st.sidebar.metric("Testing Score", f"{sk_scores[1]:.2%}")
         
-        return predictions
+        return sk_predictions
         
     except ValueError as e:
         st.error(f"Validation Error: {str(e)}")
