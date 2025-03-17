@@ -1,0 +1,77 @@
+{
+  "functions": [
+      {
+          "name": "query_balances",
+          "description": "Query the balance of tokens for the current address",
+          "parameters": {
+              "type": "object",
+              "properties": {
+                  "denom_list": {
+                      "type": "array",
+                      "items": {
+                          "type": "string"
+                      },
+                      "description": "List of token denominations to query (e.g., ['INJ', 'USDT']). If empty, returns all balances"
+                  }
+              },
+              "required": []
+          }
+      },
+      {
+          "name": "transfer_funds",
+          "description": "Transfer funds from current address to another Injective address",
+          "parameters": {
+              "type": "object",
+              "properties": {
+                  "to_address": {
+                      "type": "string",
+                      "description": "Recipient's Injective address"
+                  },
+                  "amount": {
+                      "type": "string",
+                      "description": "Amount to transfer (as Decimal string to preserve precision)"
+                  },
+                  "denom": {
+                      "type": "string",
+                      "description": "Token denomination (e.g., 'INJ', 'USDT')"
+                  }
+              },
+              "required": ["to_address", "amount", "denom"]
+          }
+      },
+      {
+          "name": "query_spendable_balances",
+          "description": "Query the spendable balance of tokens for the current address",
+          "parameters": {
+              "type": "object",
+              "properties": {
+                  "denom_list": {
+                      "type": "array",
+                      "items": {
+                          "type": "string"
+                      },
+                      "description": "List of token denominations to query (e.g., ['INJ', 'USDT']). If empty, returns all spendable balances"
+                  }
+              },
+              "required": []
+          }
+      },
+      {
+          "name": "query_total_supply",
+          "description": "Query the total supply of tokens on the network",
+          "parameters": {
+              "type": "object",
+              "properties": {
+                  "denom_list": {
+                      "type": "array",
+                      "items": {
+                          "type": "string"
+                      },
+                      "description": "List of token denominations to query (e.g., ['INJ', 'USDT']). If empty, returns total supply for all tokens"
+                  }
+              },
+              "required": []
+          }
+      }
+  ]
+}
