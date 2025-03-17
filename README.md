@@ -1,41 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trading Machine Learning Web Application
 
-## Getting Started
+This project is a web application for trading machine learning models. It provides an interface for users to interact with machine learning algorithms and visualize trading data.
 
-First, run the development server:
+## Project Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+tradingml-web
+├── app               
+│   ├── __init__.py   
+│   ├── main.py       
+│   ├── models        
+│   │   ├── __init__.py
+│   │   └── sk_models.py
+│   │   └── tf_models.py
+│   ├── routes        # API endpoints
+│   │   ├── __init__.py
+│   │   └── api.py
+│   ├── static        
+│   │   ├── css
+│   │   │   └── style.css
+│   │   └── js
+│   │       └── main.js
+│   └── templates    
+│       ├── about.html
+│       └── analyse.html
+│       └── analysis_result.html
+│       └── base.html
+│       └── index.html
+│       └── prediction.html
+├── utils             
+│   └── .gitkeep
+│   └──  chart_utils.py
+│   └── trading_strategy
+├── notebooks        
+│   └── analysis.ipynb
+├── tests             
+│   ├── __init__.py
+│   └── test_models.py
+├── .gitignore       
+├── config.py        
+├── requirements.txt 
+└── README.md         
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To set up the project, clone the repository and install the required dependencies:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+git clone <repository-url>
+cd tradi
+pip install -r requirements.txt
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+To run the web application, execute the following command:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+python app/main.py
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Visit `http://localhost:5000` in your web browser to access the application.
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
 
-
+This project is licensed under the MIT License. See the LICENSE file for more details.
 # Screenshots
 
 ![alt text](<Screenshot 2025-03-17 044840.png>) 
