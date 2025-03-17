@@ -8,7 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart } from "lucide-react";
 import LoadingSpinner from './LoadingSpinner';
-import StockChart from './StockChart';
+import StockChart, { StockData} from './StockChart';
+import { stock, analyze, clear, chat } from '@/app/api';
+
+
+
 
 interface Analysis {
   response: string;
@@ -24,6 +28,7 @@ interface ChatMessage {
 const ChatInterface: React.FC = () => {
   const [symbol, setSymbol] = useState<string>('NVDA');
   const [timeframe, setTimeframe] = useState<string>('1Y');
+  const [interval, setInterval] = useState<string>('hour');
   const [signals, setSignals] = useState<any>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -34,18 +39,22 @@ const ChatInterface: React.FC = () => {
   const [isChatLoading, setIsChatLoading] = useState<boolean>(false);
 
   // Fetch stock data and generate analysis
-  const fetchStockData = async () => {
+  const analyze = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Fetch stock data from your API
-      const response = await fetch(`/api/stock-data?symbol=${symbol}&timeframe=${timeframe}`);
+      const response = await stock({
+        symbol,
+        timeframe,
+        interval
+      });
       if (!response.ok) throw new Error('Failed to fetch stock data');
-      
+
       const data = await response.json();
       setSignals(data.signals);
-      
+
       // Send signals to the chart analysis endpoint
       await generateAnalysis(data.signals);
     } catch (err) {
@@ -68,13 +77,13 @@ const ChatInterface: React.FC = () => {
           signals,
         }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to generate analysis');
-      
+
       const analysisResult = await response.json();
       setAnalysis(analysisResult);
       setSessionId(analysisResult.session_id);
-      
+
       // Initialize chat with the analysis
       setChatMessages([
         {
@@ -90,13 +99,13 @@ const ChatInterface: React.FC = () => {
   // Send a chat message to the AI
   const sendChatMessage = async () => {
     if (!inputMessage.trim() || !sessionId) return;
-    
+
     // Add user message to chat
     const userMessage = { role: 'user' as const, content: inputMessage };
     setChatMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsChatLoading(true);
-    
+
     try {
       const response = await fetch('/chat', {
         method: 'POST',
@@ -108,9 +117,9 @@ const ChatInterface: React.FC = () => {
           session_id: sessionId,
         }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to get AI response');
-      
+
       const result = await response.json();
       setChatMessages(prev => [...prev, { role: 'assistant', content: result.response }]);
     } catch (err) {
@@ -124,7 +133,7 @@ const ChatInterface: React.FC = () => {
   // Clear the current chat session
   const clearChat = async () => {
     if (!sessionId) return;
-    
+
     try {
       await fetch(`/clear?session_id=${sessionId}`, {
         method: 'POST',
@@ -139,7 +148,8 @@ const ChatInterface: React.FC = () => {
 
   // Initial stock data fetch
   useEffect(() => {
-    fetchStockData();
+    clearChat();
+    analyze();
   }, []);
 
   return (
@@ -154,11 +164,11 @@ const ChatInterface: React.FC = () => {
             <div className="w-full md:w-1/3 space-y-2">
               <label htmlFor="symbol" className="text-sm font-medium">Stock Symbol</label>
               <div className="flex gap-2">
-                <Input 
-                  id="symbol" 
-                  value={symbol} 
-                  onChange={(e) => setSymbol(e.target.value.toUpperCase())} 
-                  placeholder="Enter stock symbol" 
+                <Input
+                  id="symbol"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                  placeholder="Enter stock symbol"
                   className="flex-1"
                 />
                 <Select value={timeframe} onValueChange={setTimeframe}>
@@ -174,12 +184,26 @@ const ChatInterface: React.FC = () => {
                     <SelectItem value="5Y">5 Years</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={interval} onValueChange={setInterval}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue placeholder="Interval" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="minute">1 Minute</SelectItem>
+                    <SelectItem value="5min">5 Minutes</SelectItem>
+                    <SelectItem value="15min">15 Minutes</SelectItem>
+                    <SelectItem value="30min">30 Minutes</SelectItem>
+                    <SelectItem value="hour">Hourly</SelectItem>
+                    <SelectItem value="day">Daily</SelectItem>
+                    <SelectItem value="week">Weekly</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Button onClick={fetchStockData} className="w-full" variant="default">
+              <Button onClick={clearChat} className="w-full" variant="default">
                 <LineChart className="mr-2 h-4 w-4" /> Analyze
               </Button>
             </div>
-            
+
             <div className="w-full md:w-2/3">
               {error && (
                 <Alert variant="destructive">
@@ -188,13 +212,13 @@ const ChatInterface: React.FC = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              
+
               {isLoading ? (
                 <div className="w-full h-64 flex items-center justify-center">
                   <LoadingSpinner />
                 </div>
               ) : signals ? (
-                <StockChart signals={signals} symbol={symbol} />
+                <StockChart  data={signals} />
               ) : (
                 <div className="w-full h-64 border border-dashed rounded-md flex items-center justify-center">
                   <p className="text-gray-500">Select a stock and timeframe to analyze</p>
@@ -210,7 +234,7 @@ const ChatInterface: React.FC = () => {
           <TabsTrigger value="chat">AI Chat Assistant</TabsTrigger>
           <TabsTrigger value="analysis">Technical Analysis</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="chat" className="space-y-4">
           <Card>
             <CardHeader>
@@ -222,10 +246,9 @@ const ChatInterface: React.FC = () => {
                 {chatMessages.length > 0 ? (
                   chatMessages.map((msg, index) => (
                     <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div 
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                        }`}
+                      <div
+                        className={`max-w-[80%] rounded-lg p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                          }`}
                       >
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
@@ -237,7 +260,7 @@ const ChatInterface: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex gap-2">
                 <Input
                   value={inputMessage}
@@ -250,14 +273,14 @@ const ChatInterface: React.FC = () => {
                 <Button onClick={sendChatMessage} disabled={!sessionId || isChatLoading}>
                   {isChatLoading ? <LoadingSpinner size="sm" /> : "Send"}
                 </Button>
-                <Button onClick={clearChat} variant="outline" disabled={!sessionId}>
+                <Button onClick={analyze} variant="outline" disabled={!sessionId}>
                   Clear
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="analysis" className="space-y-4">
           <Card>
             <CardHeader>

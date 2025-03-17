@@ -3,113 +3,110 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { handler, analyze, clear, chat } from '@/app/api';
-
+import { analyze, clear, chat, stock } from '@/app/api';
+import ReactMarkdown from 'react-markdown';
 import { useToast } from '@/components/ui/toaster';
-import StockChart from '@/components/StockChart';
-import ChatInterface from '@/components/ChatInterface';
+import StockChart, { StockData } from './StockChart';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Mock data for testing
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '6M', '1Y', '5Y'];
+const INTERVALS = ['minute', '5min', '15min', '30min', 'hour', 'day', 'week', 'month'];
 
-interface StockData {
-  symbol: string;
-  price: number[];
-  dates: string[];
-  short_mavg: number[];
-  long_mavg: number[];
-  positions: number[];
-}
-
-const Analyze = () => {
+const Analyze: React.FC = () => {
   const { toast } = useToast();
-  const [symbol, setSymbol] = useState('NVDA');
+  const [symbol, setSymbol] = useState('BTC');
   const [timeframe, setTimeframe] = useState('3M');
+  const [interval, setInterval] = useState('hour');
   const [isLoading, setIsLoading] = useState(false);
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<{role: string, content: string}[]>([]);
+  const [messages, setMessages] = useState<{ role: string, content: string }[]>([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
-  const fetchStockData = async () => {
+  const handleAnalyze = async () => {
     setIsLoading(true);
+    await clearData();
+    
     try {
-      //  fetch from your backend but for now, we'll simulate with some mock data
-      const mockData = {
+      // First fetch the stock data
+      console.log("Fetching stock data for", symbol, timeframe, interval);
+      const stockResponse = await stock({
         symbol,
-        price: Array(30).fill(0).map((_, i) => 100 + Math.random() * 20 - i/2),
-        dates: Array(30).fill(0).map((_, i) => new Date(Date.now() - (30-i) * 86400000).toISOString().split('T')[0]),
-        short_mavg: Array(30).fill(0).map((_, i) => 105 + Math.random() * 15 - i/3),
-        long_mavg: Array(30).fill(0).map((_, i) => 102 + Math.random() * 10 - i/4),
-        positions: Array(30).fill(0).map(() => Math.random() > 0.8 ? (Math.random() > 0.5 ? 1 : -1) : 0)
-      };
-      
-      setStockData(mockData);
-      
-      // Analyze the data
-      await analyzeChart(mockData);
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching stock data:', error);
-      toast({
-        title: "Failed to fetch data",
-        description: "Could not retrieve stock data. Please try again.",
-        variant: "destructive"
+        timeframe,
+        interval
       });
-      setIsLoading(false);
-    }
-  };
+      console.log("Stock data received:", stockResponse);
+      setStockData(stockResponse);
+      
+      // Then analyze the chart
+      console.log("Analyzing chart data");
+      const analysisResponse = await analyze({
+        symbol,
+        timeframe,
+        interval
+      });
+      console.log("Analysis response:", analysisResponse);
+      
+      setAnalysis(analysisResponse.response);
+      setSessionId(analysisResponse.session_id);
 
-  const analyzeChart = async (data: StockData) => {
-    try {
-      const signals = {
-        price: data.price,
-        short_mavg: data.short_mavg,
-        long_mavg: data.long_mavg,
-        positions: data.positions
-      };
-      
-      const response = await analyze({
-        symbol: data.symbol,
-        signals
-      });
-      
-      setAnalysis(response.response);
-      setSessionId(response.session_id);
-      
       // Add the analysis as the first system message
       setMessages([{
         role: 'system',
-        content: response.response
+        content: analysisResponse.response
       }]);
       
     } catch (error) {
-      console.error('Error analyzing chart:', error);
+      console.error('Error during analysis:', error);
       toast({
         title: "Analysis Failed",
         description: "Could not analyze the chart data.",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
-
+  
+  const clearData = async () => {
+    if (sessionId) {
+      try {
+        await clear({ session_id: sessionId });
+      } catch (error) {
+        console.error('Error clearing session:', error);
+      }
+    }
+    
+    setSessionId(null);
+    setAnalysis(null);
+    setMessages([]);
+    setInputMessage('');
+  };
+  
   const handleSendMessage = async (message: string) => {
-    if (!sessionId) return;
+    if (!sessionId || !message.trim()) return;
+
+    // Clear the input field immediately
+    setInputMessage('');
     
     // Add user message to the list
     setMessages(prev => [...prev, { role: 'user', content: message }]);
     
+    // Show loading state
+    setIsChatLoading(true);
+
     try {
       const response = await chat({
         message,
         session_id: sessionId
       });
-      
+
       // Add response to messages
       setMessages(prev => [...prev, { role: 'assistant', content: response.response }]);
-      
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -117,18 +114,20 @@ const Analyze = () => {
         description: "Could not send your message.",
         variant: "destructive"
       });
-      
+
       // Add error message
-      setMessages(prev => [...prev, { 
-        role: 'system', 
-        content: "Sorry, I couldn't process that message. Please try again." 
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: "Sorry, I couldn't process that message. Please try again."
       }]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
   useEffect(() => {
     // Load initial data when component mounts
-    fetchStockData();
+    handleAnalyze();
   }, []);
 
   return (
@@ -138,16 +137,16 @@ const Analyze = () => {
           <h1 className="text-3xl font-bold tracking-tight">Stock Analysis</h1>
           <p className="text-muted-foreground">Analyze stock data and get AI-powered insights.</p>
         </div>
-        
+
         <div className="flex space-x-2">
-          <Input 
+          <Input
             value={symbol}
-            onChange={(e: { target: { value: string; }; }) => setSymbol(e.target.value.toUpperCase())}
+            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             placeholder="Stock Symbol"
             className="w-32"
           />
-          
-          <select 
+
+          <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
             className="h-9 rounded-md border border-input px-3 py-1 text-sm"
@@ -157,7 +156,17 @@ const Analyze = () => {
             ))}
           </select>
           
-          <Button onClick={fetchStockData} disabled={isLoading}>
+          <select
+            value={interval}
+            onChange={(e) => setInterval(e.target.value)}
+            className="h-9 rounded-md border border-input px-3 py-1 text-sm"
+          >
+            {INTERVALS.map(it => (
+              <option key={it} value={it}>{it}</option>
+            ))}
+          </select>
+
+          <Button onClick={handleAnalyze} disabled={isLoading}>
             {isLoading ? <LoadingSpinner /> : 'Analyze'}
           </Button>
         </div>
@@ -176,7 +185,11 @@ const Analyze = () => {
           <Card>
             <CardHeader>
               <CardTitle>{symbol} Chart Analysis</CardTitle>
-              <CardDescription>Stock price and moving averages</CardDescription>
+              <CardDescription>
+                {stockData ? 
+                  `${timeframe} - ${interval} interval` : 
+                  'No data available'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {stockData ? (
@@ -206,18 +219,17 @@ const Analyze = () => {
               <TabsContent value="analysis" className="space-y-4">
                 <CardContent>
                   {analysis ? (
-                    <div className="prose max-w-none">
-                      <h3>Analysis for {symbol}</h3>
-                      <div dangerouslySetInnerHTML={{ __html: analysis }} />
+                    <div className="prose max-w-none dark:prose-invert">
+                      <ReactMarkdown>{analysis}</ReactMarkdown>
                     </div>
                   ) : (
                     <p className="text-muted-foreground">No analysis available. Click "Analyze" to generate insights.</p>
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    variant="outline" 
-                    onClick={fetchStockData}
+                  <Button
+                    variant="outline"
+                    onClick={handleAnalyze}
                     disabled={isLoading}
                   >
                     Refresh Analysis
@@ -225,12 +237,58 @@ const Analyze = () => {
                 </CardFooter>
               </TabsContent>
 
-              <TabsContent value="chat">
-                <ChatInterface 
-                  messages={messages}
-                  onSendMessage={handleSendMessage}
-                  sessionId={sessionId}
-                />
+              <TabsContent value="chat" className="space-y-4">
+                <CardContent className="h-[400px] overflow-y-auto">
+                  {messages.length > 0 ? (
+                    <div className="space-y-4">
+                      {messages.map((message, index) => (
+                        <div 
+                          key={index}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div 
+                            className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                              message.role === 'user' 
+                                ? 'bg-primary text-primary-foreground' 
+                                : message.role === 'system'
+                                  ? 'bg-muted text-foreground'
+                                  : 'bg-secondary'
+                            }`}
+                          >
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {isChatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-secondary rounded-lg px-4 py-2">
+                            <LoadingSpinner size="sm" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-muted-foreground">No conversation yet. Start chatting with the AI assistant.</p>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="flex gap-2">
+                  <Input 
+                    placeholder="Ask something about this stock..." 
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && inputMessage.trim() && handleSendMessage(inputMessage)}
+                    disabled={!sessionId || isChatLoading}
+                  />
+                  <Button 
+                    onClick={() => handleSendMessage(inputMessage)}
+                    disabled={!sessionId || !inputMessage.trim() || isChatLoading}
+                  >
+                    Send
+                  </Button>
+                </CardFooter>
               </TabsContent>
             </Tabs>
           </Card>

@@ -3,7 +3,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export interface AnalyzeParams {
   symbol: string;
-  signals: {
+  timeframe: string;
+  interval: string;
+  signals?: {
     price: number[];
     short_mavg: number[];
     long_mavg: number[];
@@ -41,6 +43,26 @@ export  async function handler(
 }// API handlers for the backend
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+export const stock = async (params: AnalyzeParams) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/stock-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
 
 
 export const analyze = async (params: AnalyzeParams) => {
@@ -106,5 +128,6 @@ export default {
   analyze,
   chat,
   clear,
-  handler
+  handler,
+  stock
 };

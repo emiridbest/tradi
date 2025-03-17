@@ -10,14 +10,15 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-interface StockData {
-  symbol: string;
-  price: number[];
+
+export interface StockData {
   dates: string[];
+  price: number[];
   short_mavg: number[];
   long_mavg: number[];
   positions: number[];
 }
+  
 
 interface StockChartProps {
   data: StockData;
@@ -25,9 +26,10 @@ interface StockChartProps {
 
 const StockChart: React.FC<StockChartProps> = ({ data }) => {
   // Transform the array data into the format expected by recharts
+  console.log(data);
   const chartData = data.dates.map((date, index) => {
     // Create buy/sell points based on positions
-    const position = data.positions[index];
+    const position = data.positions?.[index] || 0;
     let buyPoint = null;
     let sellPoint = null;
     
@@ -36,17 +38,16 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
     } else if (position === -1) {
       sellPoint = data.price[index];
     }
-    
+    console.log(position);
     return {
       date,
       price: data.price[index],
-      short_mavg: data.short_mavg[index],
-      long_mavg: data.long_mavg[index],
+      short_mavg: data.short_mavg?.[index] || null,
+      long_mavg: data.long_mavg?.[index] || null,
       buyPoint,
       sellPoint
     };
   });
-
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart

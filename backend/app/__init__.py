@@ -1,33 +1,9 @@
-from flask import Flask, render_template
-import os
-from flask_session import Session
-import tempfile
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-def create_app(test_config=None):
-    """Create and configure the Flask application"""
-    app = Flask(__name__)
-    
+import datetime
 
-    from dotenv import load_dotenv
-    
-    load_dotenv()
-    
-    app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
-    app.config['UPLOAD_FOLDER'] = 'uploads'
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
-    app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SESSION_FILE_DIR'] = os.path.join(tempfile.gettempdir(), 'flask_session')
-    app.config['SESSION_PERMANENT'] = False
-    app.config['SESSION_USE_SIGNER'] = True
-    os.makedirs('uploads', exist_ok=True)
-    os.makedirs('results', exist_ok=True)
-    
-    # Initialize OpenAI
-    from openai import OpenAI
-    app.config["OPENAI_CLIENT"] = OpenAI(
-        api_key=os.environ.get("OPENAI_API_KEY"),
-    )
+def create_app():
+    app = Flask(__name__)
     CORS(app, resources={
         r"/api/*": {
             "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -35,34 +11,46 @@ def create_app(test_config=None):
             "allow_headers": ["Content-Type", "Authorization"]
         }
     })
-
-    # Register blueprints
+    
+    # Import and register blueprints
     from app.routes.api import api_bp
-    app.register_blueprint(api_bp, url_prefix='/routes/api')
+    app.register_blueprint(api_bp, url_prefix='/api')
     
-
-    # Register utility functions with app
-    from app.utils.analysis import generate_chart_analysis, apply_trading_strategies
-    app.generate_chart_analysis = generate_chart_analysis
-    app.apply_trading_strategies = apply_trading_strategies
-    
-    # Health check route
-    @app.route('/health')
-    def health_check():
-        from app.models.model_instance import get_model_status
-        return {"status": "healthy", "model": get_model_status()}
-    
-    # Error handlers
+    # API-specific 404 handler - return JSON instead of HTML
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template('404.html'), 404
+        return jsonify({
+            "error": "Not Found",
+            "message": "The requested endpoint does not exist"
+        }), 404
     
-    @app.errorhandler(500)
-    def server_error(e):
-        return render_template('500.html'), 500
-    print("Registering blueprints...")
-
-    Session(app)
-
-
+    # Generic error handler for all exceptions
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # Log the error here (you might want to add logging)
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e)
+        }), 500
+    
+    # Add a simple index route for API documentation
+    @app.route('/')
+    def index():
+        return jsonify({
+            "name": "Tradi API",
+            "version": "1.0.0",
+            "endpoints": [
+                "/api/chat"
+            ]
+        })
+    
+    # Add healthcheck endpoint
+    @app.route('/api/ping')
+    def ping():
+        return jsonify({
+            "status": "ok",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "version": "1.0.0"
+        })
+    
     return app

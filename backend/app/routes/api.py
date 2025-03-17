@@ -12,6 +12,7 @@ from app.utils.trading_strategy import momentum_trading_strategy
 from app.models.model_instance import sk_model, sk_model_trained
 from app.models.model_instance import reset_model
 from app.utils.ai_utils import InjectiveChatAgent
+from app.utils.json_utils import clean_for_json
 
 # Import model from model_instance instead of app.config
 from app.models.model_instance import sk_model, sk_model_trained
@@ -32,7 +33,7 @@ def ping():
         "version": "1.0.0"
     })
 
-@api_bp.route("/stock-data", methods=["GET"])
+@api_bp.route("/stock-data", methods=["POST"])
 @cross_origin()
 def stock_data_endpoint():
     """Endpoint to fetch stock data and prepare it for the frontend chart"""
@@ -40,36 +41,26 @@ def stock_data_endpoint():
         symbol = request.args.get('symbol', 'NVDA')
         timeframe = request.args.get('timeframe', '1Y')
         interval = request.args.get('interval', 'day')
+        print(f"Fetching stock data for {symbol} - {timeframe} - {interval}")
         
         # Fetch data using your existing functions
         data = fetch_stock_data(symbol, timeframe, interval)
         signals = momentum_trading_strategy(data)
         
-        # Format the signal data for the frontend chart
-        formatted_signals = []
-        for index, row in signals.iterrows():
-            formatted_signals.append({
-                'date': index.strftime('%Y-%m-%d'),
-                'price': float(row['price']),
-                'short_mavg': float(row['short_mavg']),
-                'long_mavg': float(row['long_mavg']),
-                'positions': int(row['positions'])
-            })
-        
+        # Create response with the exact field names expected by frontend
         response = {
             'symbol': symbol,
             'timeframe': timeframe,
-            'signals': formatted_signals,
-            'stats': {
-                'trade_count': len(signals[signals['positions'] != 0]),
-                'buy_signals': len(signals[signals['positions'] == 1.0]),
-                'sell_signals': len(signals[signals['positions'] == -1.0]),
-                'price_change': float(((signals['price'].iloc[-1] - signals['price'].iloc[0]) / 
-                               signals['price'].iloc[0] * 100))
-            },
-            'last_price': float(signals['price'].iloc[-1])
+            'interval': interval,
+            'price': data['Close'].tolist(),             # Changed from 'Close' to 'price'
+            'dates': data.index.strftime('%Y-%m-%d').tolist(),  # Changed from 'Date' to 'dates', simplified format
+            'short_mavg': signals['short_mavg'].tolist(),  # Changed from 'Short_mavg' to 'short_mavg'
+            'long_mavg': signals['long_mavg'].tolist(),    # Changed from 'Long_mavg' to 'long_mavg'
+            'positions': signals['positions'].tolist()     # Changed from 'Positions' to 'positions'
         }
         
+        # Clean any NaN or non-JSON serializable values
+        clean_for_json(response)
         return jsonify(response)
     except Exception as e:
         traceback.print_exc()
@@ -139,7 +130,7 @@ def chart_analysis_endpoint():
             "error": "Invalid request format",
             "response": "Request must be in JSON format"
         }), 400
-        
+    
     data = request.get_json()
     try:
         if not data or "symbol" not in data or "signals" not in data:
@@ -147,25 +138,19 @@ def chart_analysis_endpoint():
                 "error": "Missing required data",
                 "response": "Please provide a symbol and signals data."
             }), 400
-
+        
         symbol = data["symbol"]
-        signals = pd.DataFrame(data["signals"])
+        
+        # Convert signals to DataFrame properly
+        signals_data = data["signals"]
+        signals = pd.DataFrame({
+            'price': signals_data.get('price', []),
+            'short_mavg': signals_data.get('short_mavg', []),
+            'long_mavg': signals_data.get('long_mavg', []),
+            'positions': signals_data.get('positions', [])
+        })
+        
         session_id = data.get("session_id", f"analysis_{symbol}_{datetime.now().strftime('%Y%m%d%H%M%S')}")
-        
-        # Create a separate thread to run the async function
-        import threading
-        
-        def run_async_analysis():
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(agent.analyze_chart(symbol, signals, session_id))
-            loop.close()
-            return result
-            
-        thread = threading.Thread(target=run_async_analysis)
-        thread.start()
-        thread.join()
         
         # Generate analysis directly for Flask synchronous context
         analysis_result = agent.generate_chart_analysis(symbol, signals)
@@ -179,17 +164,14 @@ def chart_analysis_endpoint():
             "symbol": symbol
         }
         
-        if "error" in result:
-            return jsonify(result), 400
-            
         return jsonify(result)
+    
     except Exception as e:
-        traceback.print_exc()
+        error_message = str(e)
         return jsonify({
-            "error": str(e),
+            "error": error_message,
             "response": "I apologize, but I encountered an error analyzing the chart data."
         }), 500
-
 @api_bp.route("/chat", methods=["POST"])
 @cross_origin()
 def chat_endpoint():
@@ -333,4 +315,10 @@ def predict():
             'traceback': traceback.format_exc()
         }), 500
 
-        
+@api_bp.errorhandler(Exception)
+def handle_exception(e):
+    """Handle exceptions in API routes"""
+    return jsonify({
+        "error": str(e),
+        "traceback": traceback.format_exc()
+    }), 500
