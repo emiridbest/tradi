@@ -1,0 +1,68 @@
+from flask import Flask, render_template
+import os
+from flask_session import Session
+import tempfile
+from flask_cors import CORS
+def create_app(test_config=None):
+    """Create and configure the Flask application"""
+    app = Flask(__name__)
+    
+
+    from dotenv import load_dotenv
+    
+    load_dotenv()
+    
+    app.secret_key = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
+    app.config['UPLOAD_FOLDER'] = 'uploads'
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = os.path.join(tempfile.gettempdir(), 'flask_session')
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    os.makedirs('uploads', exist_ok=True)
+    os.makedirs('results', exist_ok=True)
+    
+    # Initialize OpenAI
+    from openai import OpenAI
+    app.config["OPENAI_CLIENT"] = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "methods": ["GET", "POST", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
+
+    # Register blueprints
+    from app.routes.api import api_bp
+    app.register_blueprint(api_bp, url_prefix='/routes/api')
+    
+
+    # Register utility functions with app
+    from app.utils.analysis import generate_chart_analysis, apply_trading_strategies
+    app.generate_chart_analysis = generate_chart_analysis
+    app.apply_trading_strategies = apply_trading_strategies
+    
+    # Health check route
+    @app.route('/health')
+    def health_check():
+        from app.models.model_instance import get_model_status
+        return {"status": "healthy", "model": get_model_status()}
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
+    
+    @app.errorhandler(500)
+    def server_error(e):
+        return render_template('500.html'), 500
+    print("Registering blueprints...")
+
+    Session(app)
+
+
+    return app

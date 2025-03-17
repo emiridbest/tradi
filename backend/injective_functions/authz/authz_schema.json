@@ -1,0 +1,66 @@
+{
+    "functions": [
+        {
+            "name": "grant_address_auth",
+            "description": "Grants an address permission to broadcast messages to the chain on behalf of the granter",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "grantee_address": {
+                        "type": "string",
+                        "description": "The address who is given privileges to execute messages on behalf of the address"
+                    },
+                    "msg_type": {
+                        "type": "string",
+                        "description": "The injective chain message the grantee has been given permission to execute"
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "description": "Time in seconds for the authz permission to expire"
+                    }
+                },
+                "required": ["grantee_address", "msg_type", "duration"]
+            }
+        },
+        {
+            "name": "revoke_address_auth",
+            "description": "Revokes an authorized address's permission to execute messages on behalf of the granter",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "grantee_address": {
+                        "type": "string",
+                        "description": "The address whose privileges to execute messages are being revoked"
+                    },
+                    "msg_type": {
+                        "type": "string",
+                        "description": "The injective chain message type to revoke permission for"
+                    }
+                },
+                "required": ["grantee_address", "msg_type"]
+            }
+        },
+        {
+            "name": "fetch_grants",
+            "description": "Fetch authorization grants between a granter and grantee for a specific message type",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "granter": {
+                        "type": "string",
+                        "description": "The address that granted the authorization"
+                    },
+                    "grantee": {
+                        "type": "string",
+                        "description": "The address that received the authorization"
+                    },
+                    "msg_type": {
+                        "type": "string",
+                        "description": "The message type URL to query grants for"
+                    }
+                },
+                "required": ["granter", "grantee", "msg_type"]
+            }
+        }
+    ]
+}

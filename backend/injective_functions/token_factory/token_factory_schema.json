@@ -1,0 +1,112 @@
+{
+    "functions": [
+        {
+            "name": "create_denom",
+            "description": "Create a new token denomination",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "subdenom": {
+                        "type": "string",
+                        "description": "Sub-denomination of the token"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Full name of the token"
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "Token symbol"
+                    },
+                    "decimals": {
+                        "type": "integer",
+                        "description": "Number of decimal places for the token"
+                    }
+                },
+                "required": ["subdenom", "name", "symbol", "decimals"]
+            }
+        },
+        {
+            "name": "mint",
+            "description": "Mint new tokens of an existing denomination",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination to mint"
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "description": "Amount of tokens to mint"
+                    }
+                },
+                "required": ["denom", "amount"]
+            }
+        },
+        {
+            "name": "burn",
+            "description": "Burn existing tokens of a denomination",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination to burn"
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "description": "Amount of tokens to burn"
+                    }
+                },
+                "required": ["denom", "amount"]
+            }
+        },
+        {
+            "name": "set_denom_metadata",
+            "description": "Set or update metadata for a token denomination",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "sender": {
+                        "type": "string",
+                        "description": "Address of the sender"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the token"
+                    },
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination"
+                    },
+                    "subdenom": {
+                        "type": "string",
+                        "description": "Sub-denomination of the token"
+                    },
+                    "token_decimals": {
+                        "type": "integer",
+                        "description": "Number of decimal places for the token"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the token"
+                    },
+                    "symbol": {
+                        "type": "string",
+                        "description": "Token symbol"
+                    },
+                    "uri": {
+                        "type": "string",
+                        "description": "URI for additional token metadata"
+                    },
+                    "uri_hash": {
+                        "type": "string",
+                        "description": "Hash of the URI content"
+                    }
+                },
+                "required": ["sender", "description", "denom", "subdenom", "token_decimals", "name", "symbol", "uri", "uri_hash"]
+            }
+        }
+    ]
+}
