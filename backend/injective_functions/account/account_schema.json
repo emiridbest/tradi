@@ -1,0 +1,92 @@
+{
+    "functions": [
+        {
+            "name": "subaccount_transfer",
+            "description": "Transfer funds between subaccounts of the same address",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "description": "Amount to transfer (as string to preserve precision)"
+                    },
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination (e.g., 'INJ', 'USDT')"
+                    },
+                    "subaccount_idx": {
+                        "type": "integer",
+                        "description": "Source subaccount index"
+                    },
+                    "dst_subaccount_idx": {
+                        "type": "integer",
+                        "description": "Destination subaccount index"
+                    }
+                },
+                "required": ["amount", "denom", "subaccount_idx", "dst_subaccount_idx"]
+            }
+        },
+        {
+            "name": "external_subaccount_transfer",
+            "description": "Transfer funds to an external subaccount",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "string",
+                        "description": "Amount to transfer (as string to preserve precision)"
+                    },
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination (e.g., 'INJ', 'USDT')"
+                    },
+                    "subaccount_idx": {
+                        "type": "integer",
+                        "description": "Source subaccount index"
+                    },
+                    "dst_subaccount_id": {
+                        "type": "string",
+                        "description": "Destination subaccount ID"
+                    }
+                },
+                "required": ["amount", "denom", "subaccount_idx", "dst_subaccount_id"]
+            }
+        },
+        {
+            "name": "send_to_eth",
+            "description": "Send tokens to an Ethereum address",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "denom": {
+                        "type": "string",
+                        "description": "Token denomination to send"
+                    },
+                    "eth_dest": {
+                        "type": "string",
+                        "description": "Destination Ethereum address"
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "Amount to send (as string to preserve precision)"
+                    }
+                },
+                "required": ["denom", "eth_dest", "amount"]
+            }
+        },
+        {
+            "name": "fetch_tx",
+            "description": "Fetch transaction details by hash",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "tx_hash": {
+                        "type": "string",
+                        "description": "Transaction hash to fetch"
+                    }
+                },
+                "required": ["tx_hash"]
+            }
+        }
+    ]
+}
