@@ -33,18 +33,19 @@ def create_app():
             "message": str(e)
         }), 500
     
-    # Add a simple index route for API documentation
     @app.route('/')
     def index():
         return jsonify({
             "name": "Tradi API",
             "version": "1.0.0",
             "endpoints": [
-                "/api/chat"
+                "/api/chart-analysis",
+                "/api/chat",
+                "/api/ping",
+                "/api/stock-data",
             ]
         })
     
-    # Add healthcheck endpoint
     @app.route('/api/ping')
     def ping():
         return jsonify({
