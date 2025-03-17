@@ -72,13 +72,12 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 This project is licensed under the MIT License. See the LICENSE file for more details.
 # Screenshots
 
-![alt text](<Screenshot 2025-03-17 044840.png>) 
+![chat_analysis](<assets\chat_analysis.png>) 
 
-![alt text](<Screenshot 2025-03-17 044922.png>)
+![dashboard](<assets\dashboard.png>)
 
-![alt text](<Screenshot 2025-03-17 044936.png>)
+![loading](<assets\loading.png>)
 
-![alt text](<Screenshot 2025-03-17 044951.png>) 
+![price_prediction](<assets\price_prediction.png>) 
 
-![alt text](<Screenshot 2025-03-07 085713.png>)
-![alt text](<Screenshot 2025-03-11 003108.png>) 
+![real_time](<assets\real_time.png>)
