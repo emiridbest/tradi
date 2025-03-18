@@ -240,7 +240,7 @@ const Analyze: React.FC = () => {
               <TabsContent value="chat" className="space-y-4">
                 <CardContent className="h-[400px] overflow-y-auto">
                   {messages.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 text-sm font-light">
                       {messages.map((message, index) => (
                         <div 
                           key={index}

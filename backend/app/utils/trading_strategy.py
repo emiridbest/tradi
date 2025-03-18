@@ -68,7 +68,7 @@ def fetch_stock_data(symbol: str, timeframe: str, interval: str = 'hour') -> pd.
         
         if isinstance(data.columns, pd.MultiIndex):
             data.columns = data.columns.get_level_values(0)
-        data = data.bfill()
+        data = data.dropna()
 
         return data
     

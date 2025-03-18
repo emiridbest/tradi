@@ -86,6 +86,27 @@ export const analyze = async (params: AnalyzeParams) => {
   }
 };
 
+export const predict = async (params: AnalyzeParams) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/predict`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
 export const chat = async (params: ChatParams) => {
   try {
     const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -124,10 +145,30 @@ export const clear = async (params: ClearParams) => {
   }
 };
 
+export const reset = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reset-model`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+
 export default {
   analyze,
   chat,
   clear,
   handler,
-  stock
+  stock,
+  predict,
+  reset
+
 };

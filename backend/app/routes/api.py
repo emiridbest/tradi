@@ -38,9 +38,16 @@ def ping():
 def stock_data_endpoint():
     """Endpoint to fetch stock data and prepare it for the frontend chart"""
     try:
-        symbol = request.args.get('symbol', 'NVDA')
-        timeframe = request.args.get('timeframe', '1Y')
-        interval = request.args.get('interval', 'day')
+        if request.is_json:
+            # Get data from JSON body
+            data = request.get_json()
+            symbol = data.get('symbol', 'NVDA')
+            timeframe = data.get('timeframe', '1Y') 
+            interval = data.get('interval', 'day')
+        else: 
+            symbol = request.args.get('symbol', 'NVDA')
+            timeframe = request.args.get('timeframe', '1Y')
+            interval = request.args.get('interval', 'day')
         print(f"Fetching stock data for {symbol} - {timeframe} - {interval}")
         
         # Fetch data using your existing functions
@@ -69,21 +76,43 @@ def stock_data_endpoint():
             'message': 'Failed to fetch stock data'
         }), 500
 
-@api_bp.route("/predict", methods=["GET"])
+
+@api_bp.route("/predict", methods=["GET", "POST"])
 @cross_origin()
 def predict_endpoint():
     """API endpoint for price predictions"""
     try:
-        symbol = request.args.get('symbol', 'NVDA')
-        timeframe = request.args.get('timeframe', '1Y')
-        interval = request.args.get('interval', 'day')
-        
+        # Get parameters based on request method
+        if request.method == "POST":
+            if request.is_json:
+                # Get data from JSON body
+                data = request.get_json()
+                symbol = data.get('symbol', 'NVDA')
+                timeframe = data.get('timeframe', '1Y') 
+                interval = data.get('interval', 'day')
+                model_type = data.get('model', 'default')
+            else:
+                # Form data
+                symbol = request.form.get('symbol', 'NVDA')
+                timeframe = request.form.get('timeframe', '1Y')
+                interval = request.form.get('interval', 'day')
+                model_type = request.form.get('model', 'default')
+        else:
+            # GET request - get from query parameters
+            symbol = request.args.get('symbol', 'NVDA')
+            timeframe = request.args.get('timeframe', '1Y')
+            interval = request.args.get('interval', 'day')
+            model_type = request.args.get('model', 'default')
+            
+        print(f"Generating predictions for {symbol} ({timeframe}, {interval}) using model: {model_type}")
+
         # Fetch data
         data = fetch_stock_data(symbol, timeframe, interval)
         
         # Train model if not already trained
         global sk_model, sk_model_trained
         if not sk_model_trained:
+            print("Training model on data shape:", data.shape)
             metrics = sk_model.train(data)
             sk_model_trained = True
         
@@ -94,17 +123,36 @@ def predict_endpoint():
         predictions = sk_model.predict(data)
         current_price = float(data['Close'].iloc[-1])
         
+        # Convert any NumPy types to Python native types for JSON serialization
+        def convert_to_native_types(obj):
+            if isinstance(obj, (np.integer, np.floating)):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return [float(x) for x in obj]
+            elif isinstance(obj, dict):
+                return {k: convert_to_native_types(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_to_native_types(x) for x in obj]
+            return obj
+            
+        clean_predictions = convert_to_native_types(predictions)
+        clean_performance = convert_to_native_types(performance)
+        
+        print(f"Predictions complete: {clean_predictions}")
+        
         return jsonify({
             'symbol': symbol,
             'current_price': current_price,
-            'predictions': predictions,
-            'performance': performance
+            'predictions': clean_predictions,
+            'performance': clean_performance,
+            'status': 'success'
         })
     except Exception as e:
         traceback.print_exc()
         return jsonify({
             'error': str(e),
-            'message': 'Failed to generate predictions'
+            'message': 'Failed to generate predictions',
+            'status': 'error'
         }), 500
 
 @api_bp.route("/reset-model", methods=["POST"])
@@ -125,53 +173,55 @@ def reset_model_endpoint():
 @cross_origin()
 def chart_analysis_endpoint():
     """Endpoint to analyze chart data and initialize conversation"""
-    if not request.is_json:
-        return jsonify({
-            "error": "Invalid request format",
-            "response": "Request must be in JSON format"
-        }), 400
-    
-    data = request.get_json()
+        
     try:
-        if not data or "symbol" not in data or "signals" not in data:
+        if request.is_json:
+            # Get data from JSON body
+            data = request.get_json()
+            symbol = data.get('symbol', 'NVDA')
+            timeframe = data.get('timeframe', '1Y') 
+            interval = data.get('interval', 'day')
+        else: 
+            symbol = request.args.get('symbol', 'NVDA')
+            timeframe = request.args.get('timeframe', '1Y')
+            interval = request.args.get('interval', 'day')
+      
+        if not data or "symbol" not in data:
             return jsonify({
-                "error": "Missing required data",
-                "response": "Please provide a symbol and signals data."
+                "error": "Missing symbol",
+                "response": "Please provide a symbol for analysis."
             }), 400
-        
-        symbol = data["symbol"]
-        
+        data = fetch_stock_data(symbol, timeframe, interval)
+
         # Convert signals to DataFrame properly
-        signals_data = data["signals"]
-        signals = pd.DataFrame({
-            'price': signals_data.get('price', []),
-            'short_mavg': signals_data.get('short_mavg', []),
-            'long_mavg': signals_data.get('long_mavg', []),
-            'positions': signals_data.get('positions', [])
-        })
-        
+        signals = momentum_trading_strategy(data)
         session_id = data.get("session_id", f"analysis_{symbol}_{datetime.now().strftime('%Y%m%d%H%M%S')}")
         
-        # Generate analysis directly for Flask synchronous context
+        # Check if signals DataFrame is empty
+        if signals.empty:
+            return jsonify({
+                "error": "Empty data",
+                "response": f"No valid data available for {symbol}."
+            }), 400
+            
+        # Generate analysis
         analysis_result = agent.generate_chart_analysis(symbol, signals)
         
-        # Add to token context
-        agent.add_token_context(session_id, symbol, analysis_result)
-        
-        result = {
+        return jsonify({
             "response": analysis_result,
             "session_id": session_id,
             "symbol": symbol
-        }
+        })
         
-        return jsonify(result)
-    
     except Exception as e:
-        error_message = str(e)
+        print(f"Error in chart analysis: {str(e)}")
+        traceback.print_exc()
         return jsonify({
-            "error": error_message,
-            "response": "I apologize, but I encountered an error analyzing the chart data."
+            "error": str(e),
+            "response": f"Error analyzing chart: {str(e)}"
         }), 500
+
+
 @api_bp.route("/chat", methods=["POST"])
 @cross_origin()
 def chat_endpoint():

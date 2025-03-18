@@ -3,25 +3,30 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { BarChart3, Home, Info, LineChart, Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-
+  
+  console.log("Current pathname:", pathname); // Add this for debugging
+  
   const isActive = (path: string) => {
-    return pathname === path;
+    const active = path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`);
+    console.log(`Checking path: ${path}, result: ${active}`); // Add this for debugging
+    return active;
   };
+  
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Analyze', path: '/analyze' },
-    { name: 'Predict', path: '/predict' },
-    { name: 'About', path: '/about' },
+    { name: 'Home', path: '/', icon: <Home className="h-4 w-4" /> },
+    { name: 'Analysis', path: '/analyze', icon: <LineChart className="h-4 w-4" /> },
+    { name: 'Predictions', path: '/predict', icon: <BarChart3 className="h-4 w-4" /> },
+    { name: 'About', path: '/about', icon: <Info className="h-4 w-4" /> },
   ];
 
   return (
@@ -33,26 +38,25 @@ const Navbar = () => {
               <h1 className="text-xl font-bold text-primary">Tradi</h1>
             </Link>
           </div>
-          
+
           {/* Desktop menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
-                    isActive(item.path)
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-foreground/70 hover:bg-muted hover:text-foreground'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+          <div className="hidden md:flex items-center space-x-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                  isActive(item.path)
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-foreground/70 hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                {item.icon && <span className="mr-2">{item.icon}</span>}
+                {item.name}
+              </Link>
+            ))}
           </div>
-          
+
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
@@ -74,13 +78,14 @@ const Navbar = () => {
             <Link
               key={item.path}
               href={item.path}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
+              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
                 isActive(item.path)
                   ? 'bg-primary/10 text-primary'
                   : 'text-foreground/70 hover:bg-muted hover:text-foreground'
               }`}
               onClick={() => setIsOpen(false)}
             >
+              {item.icon && <span className="mr-2">{item.icon}</span>}
               {item.name}
             </Link>
           ))}
