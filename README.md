@@ -58,7 +58,7 @@ pip install -r requirements.txt
 To run the web application, execute the following command:
 
 ```bash
-python app/main.py
+python main.py
 ```
 
 Visit `http://localhost:5000` in your web browser to access the application.
@@ -72,12 +72,12 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 This project is licensed under the MIT License. See the LICENSE file for more details.
 # Screenshots
 
-![chat_analysis](<assets\chat_analysis.png>) 
+![chat_analysis](https://github.com/emiridbest/tradi/blob/main/assets/chat_analysis.png) 
 
-![dashboard](<assets\dashboard.png>)
+![dashboard](https://github.com/emiridbest/tradi/blob/main/assets/dashboard.png)
 
-![loading](<assets\loading.png>)
+![loading](https://github.com/emiridbest/tradi/blob/main/assets/loading.png)
 
-![price_prediction](<assets\price_prediction.png>) 
+![price_prediction](https://github.com/emiridbest/tradi/blob/main/assets/price_prediction.png) 
 
-![real_time](<assets\real_time.png>)
+![real_time](https://github.com/emiridbest/tradi/blob/main/assets/real_time.png)
