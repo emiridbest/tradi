@@ -20,7 +20,8 @@ class InjectiveChatAgent:
         load_dotenv()
 
         # Get API key from environment variable
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = os.getenv("OPENAI_API_KEY")  
+
         if not self.api_key:
             raise ValueError(
                 "No OpenAI API key found. Please set the OPENAI_API_KEY environment variable."
@@ -104,6 +105,11 @@ class InjectiveChatAgent:
         self, agent_id: str, private_key: str, environment: str = "testnet"
     ) -> None:
         """Initialize Injective clients if they don't exist"""
+        private_key = os.getenv("INJECTIVE_PRIVATE_KEY")
+        environment = os.getenv("INJECTIVE_ENVIRONMENT")
+
+        print(private_key)
+        print(environment)
         if agent_id not in self.agents:
             clients = await InjectiveClientFactory.create_all(
                 private_key=private_key, network_type=environment
@@ -189,7 +195,7 @@ class InjectiveChatAgent:
             # Get response from OpenAI
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
