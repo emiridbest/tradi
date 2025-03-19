@@ -1,55 +1,36 @@
 import Link from 'next/link';
-import { ArrowRight, ChartLine, Brain, Zap, TrendingUp, BarChart4, LineChart } from 'lucide-react';
+import { ArrowRight, ChartLine, Brain, Zap, TrendingUp, BarChart4 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
 
 export default function HomePage() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-background to-muted/20 py-24 overflow-hidden">
+      <section className="relative bg-gradient-vibrant py-24 overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <Badge variant="outline" className="mb-4 py-1.5 px-4 text-sm font-medium">
-              Powered by AI & Machine Learning
-            </Badge>
-            
-            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl mb-6 text-gradient-vibrant">
               Smart Trading Analysis
             </h1>
-            
-            <p className="mt-4 text-xl text-muted-foreground max-w-3xl">
-              Get real-time insights, technical analysis, and price predictions 
+
+            <p className="mt-4 text-xl text-white max-w-3xl">
+              Get real-time insights, technical analysis, and price predictions
               to make smarter, data-driven trading decisions.
             </p>
-            
+
             <div className="mt-10 flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="rounded-full px-8 h-12 font-medium">
+              <Button size="lg" className="btn-gradient rounded-full px-8 h-12 font-medium">
                 <Link href="/analyze" className="flex items-center">
                   Start Analyzing <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="rounded-full px-8 h-12 font-medium">
+              <Button variant="outline" size="lg" className="card-glass text-white rounded-full px-8 h-12 font-medium">
                 <Link href="/predictions">
                   View Predictions
                 </Link>
               </Button>
             </div>
-          </div>
-        </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary rounded-full blur-3xl" />
-          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-primary/70 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="hidden lg:block absolute -bottom-24 left-1/2 transform -translate-x-1/2">
-          <div className="relative w-[800px] h-[160px] opacity-20">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/30 to-primary/10 blur-md" />
-            <LineChart className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 text-primary/70" strokeWidth={1} />
           </div>
         </div>
       </section>
@@ -141,7 +122,7 @@ export default function HomePage() {
                 <div className="text-sm text-muted-foreground">Stocks Analyzed</div>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
               <div className="mb-2">
                 <TrendingUp className="h-10 w-10 text-primary/80" />
@@ -151,7 +132,7 @@ export default function HomePage() {
                 <div className="text-sm text-muted-foreground">Analysis Accuracy</div>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
               <div className="mb-2">
                 <Brain className="h-10 w-10 text-primary/80" />
@@ -161,7 +142,7 @@ export default function HomePage() {
                 <div className="text-sm text-muted-foreground">AI Models</div>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
               <div className="mb-2">
                 <Zap className="h-10 w-10 text-primary/80" />

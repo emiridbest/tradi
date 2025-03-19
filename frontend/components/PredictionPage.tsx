@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,21 +12,26 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { useToast } from '@/components/ui/toaster';
-import { AlertCircle, TrendingUp, BarChart3, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"
+import { AlertCircle, TrendingUp, RefreshCcw, AlertTriangle } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PredictionChart from '@/components/PredictionChart';
-import { analyze, AnalyzeParams, predict, reset } from '@/app/api';
-import { time } from 'console';
+import { AnalyzeParams, predict, reset } from '@/app/api';
 // Define types for predictions
-interface PredictionData {
+export interface PredictionData {
   symbol: string;
   current_price: number;
   predictions: {
-    next_day: number;
-    three_day: number;
-    week: number;
-    month: number;
+    // For hourly intervals
+    "1h"?: number;
+    "4h"?: number;
+    "8h"?: number;
+    "24h"?: number;
+    // For daily intervals
+    "1d"?: number;
+    "7d"?: number;
+    "30d"?: number;
+    "90d"?: number;
   };
   performance: {
     mse: number;
@@ -41,7 +46,7 @@ interface PredictionData {
 
 // Mock data for testing without API
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '6M', '1Y'];
-const INTERVALS = ['minute', '5min', '15min', '30min', 'hour', 'day', 'week'];
+const INTERVALS = [ 'hour', 'day'];
 const DEFAULT_SYMBOLS = ['AAPL', 'NVDA', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'BTC'];
 
 const PredictionPage: React.FC = () => {
@@ -70,7 +75,7 @@ const PredictionPage: React.FC = () => {
       // Make API call to get predictions
       const response = await predict(analyzeParams);
       setPredictionData(response);
-
+      console.log('Prediction data:', response);
       toast({
         title: "Prediction Generated",
         description: `Successfully generated price forecast for ${symbol}`,
@@ -272,69 +277,130 @@ const PredictionPage: React.FC = () => {
 
                       <Card>
                         <CardHeader className="py-3">
-                          <CardTitle className="text-sm font-medium">Next Day Forecast</CardTitle>
+                          <CardTitle className="text-sm font-medium">
+                            {interval.includes('min') || interval === 'hour' ? 'Next Hour Forecast' : 'Next Day Forecast'}
+                          </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <p className="text-2xl font-bold">
-                            {formatCurrency(predictionData.predictions.next_day)}
+                            {formatCurrency(predictionData.predictions["1h"] || predictionData.predictions["1d"] || 0)}
                           </p>
                           <p className={`text-sm ${getChangeColor(
-                            parseFloat(calculateChange(predictionData.current_price, predictionData.predictions.next_day))
+                            parseFloat(calculateChange(predictionData.current_price,
+                              predictionData.predictions["1h"] || predictionData.predictions["1d"] || 0))
                           )}`}>
-                            {calculateChange(predictionData.current_price, predictionData.predictions.next_day)}% from current
+                            {calculateChange(predictionData.current_price,
+                              predictionData.predictions["1h"] || predictionData.predictions["1d"] || 0)}% from current
                           </p>
                         </CardContent>
                       </Card>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Card>
-                        <CardHeader className="py-2">
-                          <CardTitle className="text-sm font-medium">3-Day Forecast</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-xl font-bold">
-                            {formatCurrency(predictionData.predictions.three_day)}
-                          </p>
-                          <p className={`text-xs ${getChangeColor(
-                            parseFloat(calculateChange(predictionData.current_price, predictionData.predictions.three_day))
-                          )}`}>
-                            {calculateChange(predictionData.current_price, predictionData.predictions.three_day)}%
-                          </p>
-                        </CardContent>
-                      </Card>
+                      {/* Conditionally render hourly or daily predictions */}
+                      {interval.includes('min') || interval === 'hour' ? (
+                        // Hourly predictions
+                        <>
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">4-Hour Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["4h"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["4h"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["4h"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
 
-                      <Card>
-                        <CardHeader className="py-2">
-                          <CardTitle className="text-sm font-medium">1-Week Forecast</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-xl font-bold">
-                            {formatCurrency(predictionData.predictions.week)}
-                          </p>
-                          <p className={`text-xs ${getChangeColor(
-                            parseFloat(calculateChange(predictionData.current_price, predictionData.predictions.week))
-                          )}`}>
-                            {calculateChange(predictionData.current_price, predictionData.predictions.week)}%
-                          </p>
-                        </CardContent>
-                      </Card>
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">8-Hour Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["8h"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["8h"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["8h"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
 
-                      <Card>
-                        <CardHeader className="py-2">
-                          <CardTitle className="text-sm font-medium">1-Month Forecast</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-xl font-bold">
-                            {formatCurrency(predictionData.predictions.month)}
-                          </p>
-                          <p className={`text-xs ${getChangeColor(
-                            parseFloat(calculateChange(predictionData.current_price, predictionData.predictions.month))
-                          )}`}>
-                            {calculateChange(predictionData.current_price, predictionData.predictions.month)}%
-                          </p>
-                        </CardContent>
-                      </Card>
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">24-Hour Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["24h"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["24h"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["24h"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </>
+                      ) : (
+                        // Daily predictions
+                        <>
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">7-Day Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["7d"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["7d"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["7d"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">30-Day Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["30d"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["30d"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["30d"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader className="py-2">
+                              <CardTitle className="text-sm font-medium">90-Day Forecast</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-xl font-bold">
+                                {formatCurrency(predictionData.predictions["90d"] || 0)}
+                              </p>
+                              <p className={`text-xs ${getChangeColor(
+                                parseFloat(calculateChange(predictionData.current_price, predictionData.predictions["90d"] || 0))
+                              )}`}>
+                                {calculateChange(predictionData.current_price, predictionData.predictions["90d"] || 0)}%
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </>
+                      )}
                     </div>
 
                     <Alert>
@@ -352,7 +418,6 @@ const PredictionPage: React.FC = () => {
                   </div>
                 )}
               </TabsContent>
-
               <TabsContent value="chart">
                 {isLoading ? (
                   <Skeleton className="h-80 w-full" />
@@ -459,7 +524,10 @@ const PredictionPage: React.FC = () => {
                   <h3 className="font-medium mb-2">Market Sentiment</h3>
                   <div className="bg-muted p-3 rounded-md">
                     <p className="text-sm">
-                      {predictionData && predictionData.predictions.next_day > predictionData.current_price
+                      {predictionData && (
+                        (predictionData.predictions["1h"] !== undefined && predictionData.predictions["1h"] > predictionData.current_price) ||
+                        (predictionData.predictions["1d"] !== undefined && predictionData.predictions["1d"] > predictionData.current_price)
+                      )
                         ? "The model suggests a bullish short-term outlook based on recent price action."
                         : "The model suggests a bearish short-term outlook based on recent price action."}
                     </p>
@@ -468,7 +536,7 @@ const PredictionPage: React.FC = () => {
 
                 <div>
                   <h3 className="font-medium mb-2">Technical Factors</h3>
-                  <ul className="space-y-1 text-sm">
+                  <ul className="space-y-1 text-sm font-light">
                     <li>• Trend direction</li>
                     <li>• Price momentum</li>
                     <li>• Moving averages</li>

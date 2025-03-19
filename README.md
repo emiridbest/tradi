@@ -1,67 +1,79 @@
-# Trading Machine Learning Web Application
+# Tradi App
 
-This project is a web application for trading machine learning models. It provides an interface for users to interact with machine learning algorithms and visualize trading data.
+Tradi is an advanced trading analysis multi-agent dApp combining AI and machine learning to deliver real-time market insights, technical analysis, and price predictions. The system features interactive charts, conversational AI, and predictive models to help traders make data-driven decisions through an intuitive Next.js frontend and powerful Flask backend with scikit-learn and TensorFlow integration.
 
 ## Project Structure
 
 ```
-tradingml-web
-├── app               
-│   ├── __init__.py   
-│   ├── main.py       
-│   ├── models        
-│   │   ├── __init__.py
-│   │   └── sk_models.py
-│   │   └── tf_models.py
-│   ├── routes        # API endpoints
-│   │   ├── __init__.py
-│   │   └── api.py
-│   ├── static        
-│   │   ├── css
-│   │   │   └── style.css
-│   │   └── js
-│   │       └── main.js
-│   └── templates    
-│       ├── about.html
-│       └── analyse.html
-│       └── analysis_result.html
-│       └── base.html
-│       └── index.html
-│       └── prediction.html
-├── utils             
-│   └── .gitkeep
-│   └──  chart_utils.py
-│   └── trading_strategy
-├── notebooks        
-│   └── analysis.ipynb
-├── tests             
-│   ├── __init__.py
-│   └── test_models.py
-├── .gitignore       
-├── config.py        
-├── requirements.txt 
-└── README.md         
+tradi/
+├── frontend/                 # Next.js application
+│   ├── app/                  # Pages and routes (home, analyze, predictions)
+│   ├── components/           # UI components (charts, forms, prediction displays)
+│   └── public/               # Static assets and images
+├── backend/                  # Flask API server
+│   ├── app/                  # Core application
+│   │   ├── models/           # ML prediction models (sklearn, tensorflow. arima)
+│   │   └── routes/           # API endpoints for data and predictions
+│   └── utils/                # Trading strategies and data processing
+└── README.md                 # Project documentation     
 ```
 
 ## Installation
 
-To set up the project, clone the repository and install the required dependencies:
+1. Clone this repository and navigate into it:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/emiridbest/tradi
 cd tradi
-pip install -r requirements.txt
+```
+# Backend Setup
+2. Install the required packages:
+
+```bash
+pip install -r requirements.txt  
 ```
 
-## Usage
-
-To run the web application, execute the following command:
+3. Setup environment variables
 
 ```bash
-python main.py
+
+# Create .env file and add these variables
+OPENAI_API_KEY="your_openai_api_key_here"
+INJECTIVE_PRIVATE_KEY="your_injective_agent_private_key"
+INJECTIVE_ENVIRONMENT=testnet
+```
+
+4. Running the agent
+
+```bash
+python main.py 
+```
+
+
+# Frontend setup
+5. Open new terminal in the root directory of the project and install dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+6. Setup environment variables
+-  Create .env file
+- Add NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:5000/api to .env file
+
+7. Run react app
+
+```bash
+npm run dev
+
 ```
 
 Visit `http://localhost:5000` in your web browser to access the application.
+
+## Next Steps:
+- Incorprate and test live trading startegies
+- Test automated tarding
 
 ## Contributing
 
@@ -71,6 +83,7 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
 # Screenshots
+
 
 ![chat_analysis](https://github.com/emiridbest/tradi/blob/main/assets/chat_analysis.png) 
 

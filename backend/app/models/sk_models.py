@@ -164,6 +164,7 @@ class SKModel:
             'rmse': rmse,
             'mae': mae,
             'r2': r2,
+            'accuracy': self.model.score(X_test, y_test),
             'feature_importance': sorted_importance
         }
     
@@ -307,12 +308,14 @@ class SKModel:
             rmse = math.sqrt(mse)
             mae = mean_absolute_error(y_true, y_pred)
             r2 = r2_score(y_true, y_pred)
+            accuracy = self.model.score(X_scaled, y_true)
             
             return {
                 'mse': mse,
                 'rmse': rmse,
                 'mae': mae,
-                'r2': r2
+                'r2': r2,
+                'accuracy': accuracy
             }
         
         except Exception as e:
@@ -325,5 +328,6 @@ class SKModel:
                 'rmse': 0.0,
                 'mae': 0.0,
                 'r2': 0.0,
+                'accuracy': 0.0,
                 'error': str(e)
             }

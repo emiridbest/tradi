@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart } from "lucide-react";
 import LoadingSpinner from './LoadingSpinner';
-import StockChart, { StockData} from './StockChart';
-import { stock, analyze, clear, chat } from '@/app/api';
+import StockChart from './StockChart';
+import { stock } from '@/app/api';
 
 
 
@@ -150,6 +150,7 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     clearChat();
     analyze();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -218,7 +219,7 @@ const ChatInterface: React.FC = () => {
                   <LoadingSpinner />
                 </div>
               ) : signals ? (
-                <StockChart  data={signals} />
+                <StockChart data={signals} />
               ) : (
                 <div className="w-full h-64 border border-dashed rounded-md flex items-center justify-center">
                   <p className="text-gray-500">Select a stock and timeframe to analyze</p>
