@@ -36,6 +36,7 @@ pip install -r requirements.txt
 3. Setup environment variables
 
 ```bash
+
 # Create .env file and add these variables
 OPENAI_API_KEY="your_openai_api_key_here"
 INJECTIVE_PRIVATE_KEY="your_injective_agent_private_key"
@@ -65,6 +66,7 @@ npm install
 
 ```bash
 npm run dev
+
 ```
 
 Visit `http://localhost:5000` in your web browser to access the application.
@@ -82,12 +84,13 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 This project is licensed under the MIT License. See the LICENSE file for more details.
 # Screenshots
 
-![chat_analysis](assets\chat_analysis.png) 
 
-![dashboard](assets\dashboard.png)
+![chat_analysis](https://github.com/emiridbest/tradi/blob/main/assets/chat_analysis.png) 
 
-![loading](assets\loading.png)
+![dashboard](https://github.com/emiridbest/tradi/blob/main/assets/dashboard.png)
 
-![price_prediction](assets\price_prediction.png) 
+![loading](https://github.com/emiridbest/tradi/blob/main/assets/loading.png)
 
-![real_time](assets\real_time.png)
+![price_prediction](https://github.com/emiridbest/tradi/blob/main/assets/price_prediction.png) 
+
+![real_time](https://github.com/emiridbest/tradi/blob/main/assets/real_time.png)
