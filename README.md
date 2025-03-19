@@ -69,7 +69,7 @@ npm run dev
 
 ```
 
-Visit `http://localhost:5000` in your web browser to access the application.
+Visit `http://localhost:3000` in your web browser to access the application.
 
 ## Next Steps:
 - Incorprate and test live trading startegies
