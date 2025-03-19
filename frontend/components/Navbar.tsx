@@ -4,19 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BarChart3, Home, Info, LineChart, Menu, X } from 'lucide-react';
+import { ThemeSelector } from './ThemeSelector';
 
+// In your Navbar component:
+<div className="flex items-center space-x-2">
+  <ThemeSelector />
+  {/* Your other navbar items */}
+</div>
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  
+
   console.log("Current pathname:", pathname); // Add this for debugging
-  
+
   const isActive = (path: string) => {
     const active = path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`);
     console.log(`Checking path: ${path}, result: ${active}`); // Add this for debugging
     return active;
   };
-  
+
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -45,16 +51,19 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive(item.path)
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${isActive(item.path)
                     ? 'bg-primary/10 text-primary'
                     : 'text-foreground/70 hover:bg-accent hover:text-accent-foreground'
-                }`}
+                  }`}
               >
                 {item.icon && <span className="mr-2">{item.icon}</span>}
                 {item.name}
+
               </Link>
+
             ))}
+            <ThemeSelector />
+
           </div>
 
           {/* Mobile menu button */}
@@ -78,11 +87,10 @@ const Navbar = () => {
             <Link
               key={item.path}
               href={item.path}
-              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
-                isActive(item.path)
+              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${isActive(item.path)
                   ? 'bg-primary/10 text-primary'
                   : 'text-foreground/70 hover:bg-muted hover:text-foreground'
-              }`}
+                }`}
               onClick={() => setIsOpen(false)}
             >
               {item.icon && <span className="mr-2">{item.icon}</span>}

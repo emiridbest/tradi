@@ -59,11 +59,11 @@ def stock_data_endpoint():
             'symbol': symbol,
             'timeframe': timeframe,
             'interval': interval,
-            'price': data['Close'].tolist(),             # Changed from 'Close' to 'price'
-            'dates': data.index.strftime('%Y-%m-%d').tolist(),  # Changed from 'Date' to 'dates', simplified format
-            'short_mavg': signals['short_mavg'].tolist(),  # Changed from 'Short_mavg' to 'short_mavg'
-            'long_mavg': signals['long_mavg'].tolist(),    # Changed from 'Long_mavg' to 'long_mavg'
-            'positions': signals['positions'].tolist()     # Changed from 'Positions' to 'positions'
+            'price': data['Close'].tolist(),          
+            'dates': data.index.strftime('%Y-%m-%d').tolist(), 
+            'short_mavg': signals['short_mavg'].tolist(), 
+            'long_mavg': signals['long_mavg'].tolist(),  
+            'positions': signals['positions'].tolist()  
         }
         
         # Clean any NaN or non-JSON serializable values
@@ -82,6 +82,7 @@ def stock_data_endpoint():
 def predict_endpoint():
     """API endpoint for price predictions"""
     try:
+        reset_model()
         # Get parameters based on request method
         if request.method == "POST":
             if request.is_json:
@@ -108,7 +109,6 @@ def predict_endpoint():
 
         # Fetch data
         data = fetch_stock_data(symbol, timeframe, interval)
-        
         # Train model if not already trained
         global sk_model, sk_model_trained
         if not sk_model_trained:
@@ -333,31 +333,43 @@ def train_model():
 def predict():
     """Make predictions using trained model."""
     try:
-        global sk_model, sk_model_trained
-        
-        # Get input data
-        data = request.get_json()
-        
-        # Convert to DataFrame
-        df = pd.DataFrame(data['price_history'])
+        if request.is_json:
+            # Get data from JSON body
+            data = request.get_json()
+            symbol = data.get('symbol', 'NVDA')
+            timeframe = data.get('timeframe', '1Y') 
+            interval = data.get('interval', 'day')
+        else: 
+            symbol = request.args.get('symbol', 'NVDA')
+            timeframe = request.args.get('timeframe', '1Y')
+            interval = request.args.get('interval', 'day')
+      
+        if not data or "symbol" not in data:
+            return jsonify({
+                "error": "Missing symbol",
+                "response": "Please provide a symbol for analysis."
+            }), 400
+        data = fetch_stock_data(symbol, timeframe, interval)
         
         # Train model if not already trained (per chart)
         if not sk_model_trained:
-            metrics = sk_model.train(df)
+            metrics = sk_model.train(data)
             sk_model_trained = True
         
-        # Make prediction
-        predictions = sk_model.predict(df)
+        # Get performance metrics
+        performance = sk_model.evaluate(data)
         
-        # Convert numpy values to Python native types
-        predictions = {k: float(v) for k, v in predictions.items()}
+        # Make predictions
+        predictions = sk_model.predict(data)
+        current_price = float(data['Close'].iloc[-1])
         
         return jsonify({
             'status': 'success',
+            'current_price': current_price,
             'predictions': predictions,
-            'current_price': float(df['Close'].iloc[-1])
+            'performance': performance
         })
-    
+        
     except Exception as e:
         return jsonify({
             'status': 'error',

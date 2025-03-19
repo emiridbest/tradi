@@ -18,7 +18,7 @@ export interface StockData {
   long_mavg: number[];
   positions: number[];
 }
-  
+
 
 interface StockChartProps {
   data: StockData;
@@ -32,7 +32,7 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
     const position = data.positions?.[index] || 0;
     let buyPoint = null;
     let sellPoint = null;
-    
+
     if (position === 1) {
       buyPoint = data.price[index];
     } else if (position === -1) {
@@ -55,8 +55,8 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
         margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
       >
         <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-        <XAxis 
-          dataKey="date" 
+        <XAxis
+          dataKey="date"
           tick={{ fontSize: 12 }}
           tickFormatter={(date) => {
             const d = new Date(date);
@@ -64,62 +64,63 @@ const StockChart: React.FC<StockChartProps> = ({ data }) => {
           }}
           minTickGap={30}
         />
-        <YAxis 
+        <YAxis
           domain={['auto', 'auto']}
           tick={{ fontSize: 12 }}
           tickFormatter={(value) => `$${value.toFixed(0)}`}
         />
-        <Tooltip 
+        
+        <Tooltip
           formatter={(value: any) => [`$${Number(value).toFixed(2)}`, undefined]}
           labelFormatter={(label) => new Date(label).toLocaleDateString()}
         />
         <Legend />
-        
+
         {/* Main price line */}
-        <Line 
-          type="monotone" 
-          dataKey="price" 
-          stroke="#2563eb" 
+        <Line
+          type="monotone"
+          dataKey="price"
+          stroke="#2563eb"
           name="Price"
           dot={false}
           strokeWidth={2}
           activeDot={{ r: 6, strokeWidth: 0 }}
         />
-        
+
         {/* Moving averages */}
-        <Line 
-          type="monotone" 
-          dataKey="short_mavg" 
-          stroke="#22c55e" 
+        <Line
+          type="monotone"
+          dataKey="short_mavg"
+          stroke="#22c55e"
           name="Short MA"
           dot={false}
           strokeDasharray="5 5"
           strokeWidth={1.5}
         />
-        <Line 
-          type="monotone" 
-          dataKey="long_mavg" 
-          stroke="#ef4444" 
+        <Line
+          type="monotone"
+          dataKey="long_mavg"
+          stroke="#ef4444"
           name="Long MA"
           dot={false}
           strokeDasharray="5 5"
           strokeWidth={1.5}
         />
-        
+
         {/* Buy points */}
-        <Line 
-          type="monotone" 
-          dataKey="buyPoint" 
+        <Line
+          type="monotone"
+          dataKey="buyPoint"
           stroke="#16a34a"
           name="Buy Signal"
           dot={{ r: 6, strokeWidth: 2, fill: "white" }}
           activeDot={{ r: 8 }}
         />
-        
+
         {/* Sell points */}
-        <Line 
-          type="monotone" 
-          dataKey="sellPoint" 
+        <Line
+          type="monotone"
+          dataKey="sellPoint"
           stroke="#dc2626"
           name="Sell Signal"
           dot={{ r: 6, strokeWidth: 2, fill: "white" }}

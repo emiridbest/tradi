@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { analyze, clear, chat, stock } from '@/app/api';
 import ReactMarkdown from 'react-markdown';
-import { useToast } from '@/components/ui/toaster';
+import { useToast } from "@/hooks/use-toast"
 import StockChart, { StockData } from './StockChart';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Mock data for testing
 const TIMEFRAMES = ['1D', '1W', '1M', '3M', '6M', '1Y', '5Y'];
-const INTERVALS = ['minute', '5min', '15min', '30min', 'hour', 'day', 'week', 'month'];
+const INTERVALS = ['15min', '30min', 'hour', 'day', 'week', 'month'];
 
 const Analyze: React.FC = () => {
   const { toast } = useToast();
@@ -126,8 +126,8 @@ const Analyze: React.FC = () => {
   };
 
   useEffect(() => {
-    // Load initial data when component mounts
     handleAnalyze();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -223,7 +223,7 @@ const Analyze: React.FC = () => {
                       <ReactMarkdown>{analysis}</ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No analysis available. Click "Analyze" to generate insights.</p>
+                    <p className="text-muted-foreground">No analysis available. Click Analyze to generate insights.</p>
                   )}
                 </CardContent>
                 <CardFooter>

@@ -162,13 +162,3 @@ export const reset = async () => {
   }
 };
 
-export default {
-  analyze,
-  chat,
-  clear,
-  handler,
-  stock,
-  predict,
-  reset
-
-};

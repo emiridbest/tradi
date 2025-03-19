@@ -161,7 +161,8 @@ class InjectiveChatAgent:
             self.conversations[session_id].append({"role": "user", "content": message})
 
             # Build system message with token context if available
-            system_message = """You are a helpful AI assistant on Injective Chain. 
+            system_message = """You are a helpful AI assistant on Injective Chain. `{self.conversations[session_id]}` is the conversation history for this session.
+            You will be helping me make decisions on the analysis and predictions made by the other agent as it will be passed onto you.
             You will be answering all things related to injective chain, and help out with
             on-chain functions.
             
@@ -280,7 +281,7 @@ class InjectiveChatAgent:
                     "session_id": session_id,
                 }
             else:
-                default_response = "I'm here to help you with trading on Injective Chain. You can ask me about trading, checking balances, making transfers, or staking. How can I assist you today?"
+                default_response = "I'm here to help you with trading on Injective Chain. You can ask me about trading, checking balances, making transfers, or staking. How can I assist you today?, Do you want my opinion on `{self.conversations[session_id]}`?"
                 self.conversations[session_id].append(
                     {"role": "assistant", "content": default_response}
                 )
