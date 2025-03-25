@@ -26,7 +26,7 @@ export default function HomePage() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="card-glass text-white rounded-full px-8 h-12 font-medium">
-                <Link href="/predictions">
+                <Link href="/predict">
                   View Predictions
                 </Link>
               </Button>
