@@ -41,7 +41,7 @@ export  async function handler(
     return res.status(500).json({ error: 'Failed to fetch stock data' });
   }
 }// API handlers for the backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const stock = async (params: AnalyzeParams) => {
   try {
