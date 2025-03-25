@@ -45,7 +45,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export const stock = async (params: AnalyzeParams) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stock-data`, {
+    const response = await fetch(`${API_BASE_URL}/api/stock-data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export const stock = async (params: AnalyzeParams) => {
 
 export const analyze = async (params: AnalyzeParams) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/chart-analysis`, {
+    const response = await fetch(`${API_BASE_URL}/api/chart-analysis`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export const analyze = async (params: AnalyzeParams) => {
 
 export const predict = async (params: AnalyzeParams) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/predict`, {
+    const response = await fetch(`${API_BASE_URL}/api/predict`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export const predict = async (params: AnalyzeParams) => {
 
 export const chat = async (params: ChatParams) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
+    const response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export const chat = async (params: ChatParams) => {
 
 export const clear = async (params: ClearParams) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/clear?session_id=${params.session_id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/clear?session_id=${params.session_id}`, {
       method: 'POST',
     });
     
@@ -147,7 +147,7 @@ export const clear = async (params: ClearParams) => {
 
 export const reset = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/reset-model`, {
+    const response = await fetch(`${API_BASE_URL}/api/reset-model`, {
       method: 'POST',
     });
     
