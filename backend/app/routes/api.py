@@ -58,7 +58,7 @@ def exchange_rate_endpoint():
         # Build response using the rate data format
         response = {
             'base_currency': base_currency,
-            'rate': rate_data['rate'],
+            'rate': rate_data,
             'source': rate_data['source'],
             'timestamp': rate_data['timestamp']
         }
