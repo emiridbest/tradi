@@ -6,7 +6,7 @@ from flask_cors import cross_origin
 import traceback
 from datetime import datetime
 # Import utility functions
-from app.utils.trading_strategy import fetch_stock_data
+from app.utils.trading_strategy import fetch_stock_data, fetch_exchange_rate
 from app.utils.trading_strategy import momentum_trading_strategy
 # Import models
 from app.models.model_instance import sk_model, sk_model_trained
@@ -33,6 +33,53 @@ def ping():
         "version": "1.0.0"
     })
 
+
+@api_bp.route("/exchange-rate", methods=["POST"])
+@cross_origin()
+def exchange_rate_endpoint():
+    """Endpoint to fetch exchange rate"""
+    try:
+        # Extract parameters from request
+        if request.method == "POST" and request.is_json:
+            data = request.get_json()
+            base_currency = data.get('base_currency', 'USD')
+        else:
+            base_currency = request.args.get('base_currency', 'USD')
+        
+        if not base_currency:
+            return jsonify({
+                'error': 'Missing symbol parameter',
+                'message': 'Please provide a currency symbol'
+            }), 400
+                    
+        # Fetch exchange rate with our improved function
+        rate_data = fetch_exchange_rate(base_currency)
+        
+        # Build response using the rate data format
+        response = {
+            'base_currency': base_currency,
+            'rate': rate_data['rate'],
+            'source': rate_data['source'],
+            'timestamp': rate_data['timestamp']
+        }
+        
+        # Add warning if present (for fallback rates)
+        if 'warning' in rate_data:
+            response['warning'] = rate_data['warning']
+        
+        # Add note if present
+        if 'note' in rate_data:
+            response['note'] = rate_data['note']
+        
+        clean_for_json(response)
+        return jsonify(response)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to fetch exchange rate data'
+        }), 500
+    
 @api_bp.route("/stock-data", methods=["POST"])
 @cross_origin()
 def stock_data_endpoint():
