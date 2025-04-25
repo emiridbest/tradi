@@ -43,6 +43,7 @@ def create_app():
                 "/api/chat",
                 "/api/ping",
                 "/api/stock-data",
+                "/exchange-rate"
             ]
         })
     
