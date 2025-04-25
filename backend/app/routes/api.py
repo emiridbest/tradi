@@ -59,8 +59,6 @@ def exchange_rate_endpoint():
         response = {
             'base_currency': base_currency,
             'rate': rate_data,
-            'source': rate_data['source'],
-            'timestamp': rate_data['timestamp']
         }
         
         # Add warning if present (for fallback rates)
