@@ -58,18 +58,9 @@ def exchange_rate_endpoint():
         # Build response using the rate data format
         response = {
             'base_currency': base_currency,
-            'rate': rate_data,
+            'rate': rate_data
         }
         
-        # Add warning if present (for fallback rates)
-        if 'warning' in rate_data:
-            response['warning'] = rate_data['warning']
-        
-        # Add note if present
-        if 'note' in rate_data:
-            response['note'] = rate_data['note']
-        
-        clean_for_json(response)
         return jsonify(response)
     except Exception as e:
         traceback.print_exc()
@@ -77,6 +68,8 @@ def exchange_rate_endpoint():
             'error': str(e),
             'message': 'Failed to fetch exchange rate data'
         }), 500
+
+
     
 @api_bp.route("/stock-data", methods=["POST"])
 @cross_origin()
