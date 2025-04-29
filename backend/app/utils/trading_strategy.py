@@ -95,7 +95,7 @@ def momentum_trading_strategy(data, short_window=5, long_window=20):
     
     return signals
 
-    
+  
 def fetch_exchange_rate(symbol: str, timeframe: str = "1M", interval: str = 'hour') -> pd.DataFrame:
     """
     Fetch historical stock data with timeframe and interval selection.
